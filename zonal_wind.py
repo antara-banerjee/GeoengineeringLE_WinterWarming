@@ -20,28 +20,38 @@ import basic_functions
 #********************************************************************************************************
 class zmzw:
 
-   def __init__(self, ncpath, time0, tim1, tim2):#, plev_unit='Pa', long_name=''):
+   def __init__(self, ncpath='', tim1='', tim2='', var=''):
         
-       self.time0 = time0
        self.tim1 = tim1
        self.tim2 = tim2
 
-       self.var, self.dimdict = basic_functions.extract_var_dims(ncpath, varname='U', xlatname='lat', xhgtname='lev', xtimname='time')
+       # open as xarray dataset
+       self.ncmod = xr.open_dataset(ncpath)
+       self.var = self.ncmod[var]
+
+       # modify time coordinate for CESM (1 month backwards)
+       oldtime = self.var['time']
+       newtime_beg = DatetimeNoLeap(oldtime.dt.year[0],oldtime.dt.month[0]-1,oldtime.dt.day[0])
+       newtime = xr.cftime_range(start=newtime_beg, periods=np.shape(oldtime)[0], freq='MS', calendar='noleap')
+       self.var = self.var.assign_coords(time=newtime)
+       #self.var, self.dimdict = basic_functions.extract_var_dims(ncpath, varname='TREFHT', xlonname='lon', xlatname='lat', xtimname='time')
+
+       yr_to_dec = 10
 
    #**************************************************
-   def climatology_lat_hgt(self, time_mean):
+   # climatological mean
+   def climatology_lon_lat(self, time_mean):
 
-       # seasonal mean then average over climatological time period
-       clim_var = np.zeros([len(self.dimdict['hgt']),len(self.dimdict['lat'])])
-       for ihgt in range(len(self.dimdict['hgt'])):
-          for ilat in range(len(self.dimdict['lat'])):
-             var_tsub, nsubyrs = basic_functions.time_subset(self.var[:,ihgt,ilat], self.time0, self.tim1, self.tim2)
-             var_seas = basic_functions.seasonal_mean(var_tsub, nsubyrs, time_mean)
-             var_clim_seas = np.mean(var_seas, axis=0)
-             clim_var[ihgt,ilat] = var_clim_seas
+       # time subset
+       # this subsetting allows for DJF mean that includes only D of the firt year and JF of the last year plus one
+       vtsub = self.var.sel(time=slice(str(self.tim1)+'-03-01', str(self.tim2+1)+'-02-01'))
 
-       return clim_var
+       # climatological, seasonal mean
+       vseas = vtsub.groupby('time.season').mean('time').sel(season=time_mean)
 
+       return vseas
+
+   '''
    #**************************************************
    def climatology_polar_hgt_mon(self):
 
@@ -76,8 +86,53 @@ class zmzw:
        print var_clim_seas.shape
        
        return var_clim_seas 
-# Calculate the lat-hgt climatology for control, geoengineering. Subtract.
-# As above but with hgt-mon
+   '''
+
+   #**************************************************
+   # trend
+   def trend_lon_lat(self, time_mean):
+
+       # time subset
+       # this subsetting allows for DJF mean that includes only D of the firt year and JF of the last year plus one
+       vtsub = self.var.sel(time=slice(str(self.tim1)+'-03-01', str(self.tim2+1)+'-02-01'))
+
+       # annual, seasonal mean - pandas gives me RAGE
+       ASseas= {'DJF':'AS-DEC',
+                'MAM':'AS-MAR',
+                'JJA':'AS-JUN',
+                'SON':'AS-SEP'}
+       vseas = vtsub.sel(time=(vtsub['time.season']==time_mean)) # select based on boolean array
+       vyrmn = vseas.resample(time=ASseas[time_mean]).mean()
+
+       x = range(vyrmn.values.shape[0])
+       y = np.reshape(vyrmn.values,(vyrmn.values.shape[0],-1))
+       coeffs = np.polyfit(x, y, 1)
+       trends = (coeffs[0,:]*30.).reshape(vyrmn.values.shape[1], vyrmn.values.shape[2])
+       xrtrends = xr.DataArray(trends,coords=[('lat',vyrmn['lat']),('lon',vyrmn['lon'])])
+       print(xrtrends)
+
+       ## trend
+       #def ols_trend(xrobject):
+
+       #   x = range(vseas.values.shape[0])
+       #   y = np.reshape(vseas.values,(vseas.values.shape[0],-1))
+       #   coeffs = np.polyfit(x, y, 1)
+       #   trends = (coeffs[0,:]/30.).reshape(vseas.values.shape[1], vseas.values.shape[2])
+
+       #dim = 'member'
+       #new_coord = range(len(xrobjects))
+
+       #func = lambda *x: np.stack(x, axis=-1)
+       #stack = xr.apply_ufunc(func, *xrobjects,
+       #                     output_core_dims=[[dim]],
+       #                     join='outer',
+       #                     dataset_fill_value=np.nan)
+
+       #ensmean = stack.mean('member')
+       #ensstd = stack.std('member')
+
+       return(xrtrends)
+
 #********************************************************************************************************
 
    
