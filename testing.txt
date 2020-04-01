@@ -1,0 +1,7 @@
+xarray djf lat=-90 lon=0 : array(247.34834, dtype=float32)
+
+should be:
+247.4976130894252
+
+247.4976
+
