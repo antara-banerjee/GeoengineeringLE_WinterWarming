@@ -51,7 +51,7 @@ class Ts:
                 'JJA':'JUN',
                 'SON':'SEP'}
        vseas = vtsub.sel(time=(vtsub['time.season']==time_mean)) # select based on boolean array
-       vyrmn = vseas.resample(time='AS-DEC').mean()
+       vyrmn = vseas.resample(time=ASseas[time_mean]).mean()
 
        x = range(vyrmn.values.shape[0])
        y = np.reshape(vyrmn.values,(vyrmn.values.shape[0],-1))

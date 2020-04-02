@@ -79,10 +79,10 @@ def t_test(p_value, diff, std1, std2, n1, n2):
 
 #********************************************************************************************************
 # ttest variable is TRUE where NOT significant
-def t_test_onesample(p_value, x, std, n):
+def t_test_onesample(alpha, x, std, n):
     
     tstat = x/np.sqrt(std**2/n)
-    tcrit = ss.t.ppf(1-p_value/2., n-1)#; print slope, std_err, tscore, tcrit
+    tcrit = ss.t.ppf(1-alpha/2., n-1)#; print slope, std_err, tscore, tcrit
     ttest = tstat < tcrit
 
     return ttest

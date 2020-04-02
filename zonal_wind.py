@@ -1,21 +1,6 @@
 import numpy as np
-import scipy.stats as ss
-import netCDF4 as ncdf
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-#plt.ioff()
-import calendar
-from mpl_toolkits.basemap import Basemap, addcyclic, shiftgrid
-from matplotlib.backends.backend_pdf import PdfPages
-# mpl_toolkits contain the class Basemap and other functions such
-# as addcyclic, shiftgrid etc.
-from pylab import *
-import matplotlib.cm as cm
-import matplotlib.colors as colors
-import custom_colors as ccol
-import numpy.ma as ma
-import get_netcdf_attributes as ncdf_att
-import basic_functions
+import xarray as xr
+from cftime import DatetimeNoLeap
 
 #********************************************************************************************************
 class zmzw:
@@ -29,14 +14,18 @@ class zmzw:
        self.ncmod = xr.open_dataset(ncpath)
        self.var = self.ncmod[var]
 
+       # zonal mean - choose single longitude 
+       self.var = self.var.isel(lon=0)
+
        # modify time coordinate for CESM (1 month backwards)
        oldtime = self.var['time']
        newtime_beg = DatetimeNoLeap(oldtime.dt.year[0],oldtime.dt.month[0]-1,oldtime.dt.day[0])
        newtime = xr.cftime_range(start=newtime_beg, periods=np.shape(oldtime)[0], freq='MS', calendar='noleap')
        self.var = self.var.assign_coords(time=newtime)
-       #self.var, self.dimdict = basic_functions.extract_var_dims(ncpath, varname='TREFHT', xlonname='lon', xlatname='lat', xtimname='time')
 
-       yr_to_dec = 10
+       self.var = self.var.fillna(0)
+
+       trend_scaling = 30.
 
    #**************************************************
    # climatological mean
@@ -107,8 +96,8 @@ class zmzw:
        x = range(vyrmn.values.shape[0])
        y = np.reshape(vyrmn.values,(vyrmn.values.shape[0],-1))
        coeffs = np.polyfit(x, y, 1)
-       trends = (coeffs[0,:]*30.).reshape(vyrmn.values.shape[1], vyrmn.values.shape[2])
-       xrtrends = xr.DataArray(trends,coords=[('lat',vyrmn['lat']),('lon',vyrmn['lon'])])
+       trends = (coeffs[0,:]*trend_scaling).reshape(vyrmn.values.shape[1], vyrmn.values.shape[2])
+       xrtrends = xr.DataArray(trends,coords=[('level',vyrmn['level']),('lat',vyrmn['lat'])])
        print(xrtrends)
 
        ## trend

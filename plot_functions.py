@@ -16,7 +16,7 @@ import matplotlib.path as mpath
 # PLOT FUNCTIONS
 #********************************************************************************************************
 # One plot, latitude-height cross section
-def plot_single_lat_hgt(z, zbase, lat, hgt, title, outname, flim, fby, clim, cby, clabel, zsig, colorbar=True):
+def plot_single_lat_hgt(z, zbase, title, outname, flim, fby, clim, cby, clabel, zsig, colorbar=True):
 
    fig = plt.figure(figsize=(8, 8))
 
@@ -35,10 +35,10 @@ def plot_single_lat_hgt(z, zbase, lat, hgt, title, outname, flim, fby, clim, cby
 
    plt_ax = fig.add_axes([0.14, 0.25, 0.75, 0.65]) # left, bottom, width, height
    #plt_ax = fig.add_axes([0.12, 0.20, 0.83, 0.65]) # left, bottom, width, height
-   cplot=contourf(lat, -np.log10(hgt), z, levs, extend="both", cmap=cols)#, ax=plt_ax)
-   cplot2=contour(lat, -np.log10(hgt), zbase, clevs, colors='black', hold='on', linewidths=0.5)#, ax=plt_ax)
-   plt.clabel(cplot2, fontsize=16, fmt='%.'+str(0)+'f') # add cdp into arguments
-   plt.title(title, fontsize=20, weight='bold')
+   cplot=plt.contourf(z.lat, -np.log10(z.level), z, levs, extend="both", cmap=cols)#, ax=plt_ax)
+   cplot2=plt.contour(zbase.lat, -np.log10(zbase.level), zbase, clevs, colors='black', hold='on', linewidths=0.5)#, ax=plt_ax)
+   plt.clabel(cplot2, fontsize=14, fmt='%.'+str(0)+'f') # add cdp into arguments
+   plt.title(title, fontsize=24)
    #plt.xlabel(xlab,fontsize=26)
    plt.ylabel(ylab,fontsize=22,labelpad=-20)
    plt.tick_params(axis='both', which='major', labelsize=22)
@@ -49,6 +49,8 @@ def plot_single_lat_hgt(z, zbase, lat, hgt, title, outname, flim, fby, clim, cby
    plt.yticks(-np.log10(yticks),yticks)
    plt.ylim((-np.log10(bottom),-np.log10(top)))
    #plt.xlim([0,90])
+
+   plt.contourf(z.lat, -np.log10(z.level), zsig, levels=[-1,0,1], hatches=[None,'.'], colors='none')
 
    ## Shade OUT non-significance
    #for m in range(len(lat)-1):
@@ -65,7 +67,7 @@ def plot_single_lat_hgt(z, zbase, lat, hgt, title, outname, flim, fby, clim, cby
    if colorbar:
       #cbar_ax = fig.add_axes([0.17, 0.10, 0.77, 0.04])
       cbar_ax = fig.add_axes([0.14, 0.13, 0.75, 0.04])
-      cbar=plt.colorbar(cplot, cax=cbar_ax, orientation='horizontal', ticks=levs)
+      cbar=plt.colorbar(cplot, cax=cbar_ax, orientation='horizontal', ticks=np.arange(-5,6,1))
       cbar.set_label(clabel,size=22)#,labelpad=-0.09)
       cbar.ax.tick_params(labelsize=22)
    plt.savefig(outname)
