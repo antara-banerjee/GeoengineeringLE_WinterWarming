@@ -48,7 +48,7 @@ nrcp85 = len(members_rcp85)
 ensmean_rcp85, ensstd_rcp85 = ensemble_functions.stats(members_rcp85)
 ttest_rcp85 = ensemble_functions.t_test_onesample(alpha, ensmean_rcp85, ensstd_rcp85, nrcp85) 
 
-plot_functions.plot_single_lat_hgt(ensmean_rcp85, ensmean_control, 'RCP8.5', outdir+'U_trend_rcp85_'+season+'.png', 5, 0.5, 60, 10, '$^{\circ}$C per 30 yrs', zsig=ttest_rcp85)
+plot_functions.plot_single_lat_hgt(ensmean_rcp85, ensmean_control, '(b) RCP8.5', outdir+'U_trend_rcp85_'+season+'.png', 5, 0.5, 60, 10, 'm s$^{-1}$ per 30 yrs', zsig=ttest_rcp85)
 
 #********************************************************************************************************
 # feedback runs
@@ -65,7 +65,7 @@ nfeedback = len(members_feedback)
 ensmean_feedback, ensstd_feedback = ensemble_functions.stats(members_feedback)
 ttest_feedback = ensemble_functions.t_test_onesample(alpha, ensmean_feedback, ensstd_feedback, nfeedback) 
 
-plot_functions.plot_single_lat_hgt(ensmean_feedback, ensmean_control, 'Feedback', outdir+'U_trend_feedback_'+season+'.png', 5, 0.5, 60, 10, '$^{\circ}$C per 30 yrs', zsig=ttest_feedback)
+plot_functions.plot_single_lat_hgt(ensmean_feedback, ensmean_control, '(a) Feedback', outdir+'U_trend_feedback_'+season+'.png', 5, 0.5, 60, 10, 'm s$^{-1}$ per 30 yrs', zsig=ttest_feedback)
 #********************************************************************************************************
 
 ##********************************************************************************************************

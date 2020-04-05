@@ -25,7 +25,7 @@ class zmzw:
 
        self.var = self.var.fillna(0)
 
-       trend_scaling = 30.
+       self.trend_scaling = 30.
 
    #**************************************************
    # climatological mean
@@ -96,7 +96,7 @@ class zmzw:
        x = range(vyrmn.values.shape[0])
        y = np.reshape(vyrmn.values,(vyrmn.values.shape[0],-1))
        coeffs = np.polyfit(x, y, 1)
-       trends = (coeffs[0,:]*trend_scaling).reshape(vyrmn.values.shape[1], vyrmn.values.shape[2])
+       trends = (coeffs[0,:]*self.trend_scaling).reshape(vyrmn.values.shape[1], vyrmn.values.shape[2])
        xrtrends = xr.DataArray(trends,coords=[('level',vyrmn['level']),('lat',vyrmn['lat'])])
        print(xrtrends)
 
