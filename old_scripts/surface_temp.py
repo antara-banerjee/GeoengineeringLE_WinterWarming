@@ -20,13 +20,13 @@ import basic_functions
 #********************************************************************************************************
 class Ts:
     
-   def __init__(self, ncpath, time0, tim1, tim2):#, plev_unit='Pa', long_name=''):
+   def __init__(self, ncpath, time0, tim1, tim2, varname):#, plev_unit='Pa', long_name=''):
         
        self.time0 = time0
        self.tim1 = tim1
        self.tim2 = tim2
 
-       self.var, self.dimdict = basic_functions.extract_var_dims(ncpath, varname='TREFHT', xlonname='lon', xlatname='lat', xtimname='time')
+       self.var, self.dimdict = basic_functions.extract_var_dims(ncpath, varname=varname, xlonname='lon', xlatname='lat', xtimname='time')
 
        print(self.var.shape)
 
@@ -55,6 +55,85 @@ class Ts:
       invar_amean = np.mean(invar[ilon0:ilon1+1,ilat0:ilat1+1])
 
       return invar_amean
+
+#********************************************************************************************************
+class sst(Ts):
+
+   def __init__(self, ncpath, time0, tim1, tim2, varname):
+
+      Ts.__init__(self, ncpath, time0, tim1, tim2, varname)
+
+      #self.var = self.var.sel(time=slice(str(self.tim1)+'-03-01', str(self.tim2+1)+'-02-01'))
+
+   def calc_n34(self):
+
+      #print('got to function')
+      vtsub, nyrs = basic_functions.time_subset(self.var, self.time0, self.tim1, self.tim2)
+
+      # Compute monthly climatology    
+      sst_clim = np.zeros([12,len(self.dimdict['lat']),len(self.dimdict['lon'])])
+      for i in range(12):
+         j = np.arange(i,nyrs*12,12)
+         sst_clim[i,:,:] = np.mean(vtsub[j,:,:], axis=0)
+
+      # Compute anomaly
+      sst_anom = np.zeros([vtsub.shape[0], vtsub.shape[1], vtsub.shape[2]])
+      for i in range(vtsub.shape[0]):
+         j = i%12; print(j)
+         sst_anom[i,:,:] = vtsub[i,:,:] - sst_clim[j,:,:] 
+
+      # Area mean
+      illat = np.where(self.dimdict['lat']>=-5)[0][0]
+      iulat = np.where(self.dimdict['lat']>=5)[0][0]+1
+      illon = np.where(self.dimdict['lon']>=-170)[0][0]
+      iulon = np.where(self.dimdict['lon']>=-120)[0][0]+1
+
+      sst_anom_nino34 = np.mean(sst_anom[:, illat:iulat, illon:iulon], axis=(1,2)) # should weight latitude
+
+      # 5-month running mean
+      smooth_length = 5
+      x = (smooth_length-1)/2
+      nino34  = np.zeros([sst_anom_nino34.shape[0]-smooth_length+1])
+      #time = range(nyrs*12)
+      t = []
+      for i in range(sst_anom_nino34.shape[0]-smooth_length+1):
+          nino34[i] = np.mean(sst_anom_nino34[i:i+smooth_length])
+          t.append(x+i)
+          #years.append(self.tim1+x+i)
+
+      fig, ax = plt.subplots();
+      plt.plot(t, nino34, color='k')
+      ax.grid();
+
+      plt.axhline(y=0, color='k')
+
+      plt.fill_between(t, y1=0, y2=nino34, where=nino34>0, color='r')
+      plt.fill_between(t, y1=0, y2=nino34, where=nino34<0, color='b')
+
+      plt.savefig('nino34_numpy.png')
+
+      '''
+      # Computed climatology
+      sst_clim = self.var.groupby('time.month').mean(dim='time')
+
+      # Compute Anomaly
+      sst_anom = self.var.groupby('time.month') - sst_clim
+
+      # Compute ENSO index
+      sst_anom_nino34 = sst_anom.sel(lat=slice(-5, 5), lon=slice(190, 240))
+
+      sst_anom_nino34_mean = sst_anom_nino34.mean(dim=('lon', 'lat'))
+
+      nino34 = sst_anom_nino34_mean.rolling(time=5).mean(dim='time')
+      Fn34 = open("nino34_feedback_001.txt","w")
+      Ftime = open("time_feedback_001.txt","w")
+      Fn34.write(str(list(nino34.values)))
+      Ftime.write(str(nino34['time'].values))
+      Fn34.close()
+      Ftime.close()
+      print(list(nino34.values))
+      print(nino34['time'].values)
+      '''
       
 #********************************************************************************************************
 
