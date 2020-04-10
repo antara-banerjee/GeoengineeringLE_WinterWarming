@@ -136,7 +136,8 @@ def plot_single_lat_lon(z, title, outname, flim, fby, clim, cby, clabel, zsig=No
    
    # set up map
    prj = ccrs.NorthPolarStereo()
-   ax = fig.add_axes([0.10, 0.20, 0.8, 0.70], projection=prj) # left, bottom, width, height
+   #ax = fig.add_axes([0.10, 0.20, 0.8, 0.70], projection=prj) # left, bottom, width, height
+   ax = fig.add_axes([0.05, 0.05, 0.9, 0.90], projection=prj) # left, bottom, width, height
    ax.coastlines()
    
    # set bound (such a pain in cartopy...)
@@ -159,7 +160,7 @@ def plot_single_lat_lon(z, title, outname, flim, fby, clim, cby, clabel, zsig=No
    #z.plot(transform=ccrs.PlateCarree(), levels=levs, cmap=cols)#, levels=levs)) # default xarray plot is plt.pcolormesh
    #z.plot.contourf(transform=ccrs.PlateCarree(), levels=levs, cmap=cols)#, levels=levs)) # does not work with cyclic_z which is not an xarray object
    cplot = ax.contourf(cyclic_lon, z.lat, cyclic_z, transform=ccrs.PlateCarree(), extend='both', levels=levs, cmap=cols)
-   #plt.title(title, fontsize=18, weight='bold')
+   plt.title(title, fontsize=18)
 
    # Shade OUT non-significance
    cyclic_zsig, cyclic_tlon = add_cyclic_point(zsig, coord=z['lon'])
@@ -167,8 +168,9 @@ def plot_single_lat_lon(z, title, outname, flim, fby, clim, cby, clabel, zsig=No
 
    # colorbar
    if colorbar:
-      cbar_ax = fig.add_axes([0.05, 0.13, 0.9, 0.04]) # left, bottom, width, height
-      cbar=plt.colorbar(cplot, cax=cbar_ax, orientation='horizontal', ticks=cticks)
+      #cbar_ax = fig.add_axes([0.05, 0.13, 0.9, 0.04]) # left, bottom, width, height
+      #cbar=plt.colorbar(cplot, cax=cbar_ax, orientation='horizontal', ticks=cticks)
+      cbar=plt.colorbar(cplot, orientation='vertical', ticks=cticks)
       cbar.set_label(clabel,size=12)#,labelpad=-0.09)
       cbar.ax.tick_params(labelsize=12)
    

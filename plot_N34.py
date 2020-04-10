@@ -30,6 +30,7 @@ var = "TS"
 # 1) ensemble mean raw field or end metric?
 # 2) difference of averages or average of 400 differences?
 
+'''
 #********************************************************************************************************
 # RCP8.5
 # only 3 members here!
@@ -43,17 +44,18 @@ for i in [1]:
    members_rcp85.append(n34)
 
 print("...done")
+'''
 
 ##********************************************************************************************************
-## feedback runs
-#print("Calculating climatology for FEEDBACK")
-#
-#members_feedback = []
-#for i in range(1,2):
-#   ncpath = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0."+var+".202001-*.nc")[0]
-#   SST_inst = surface_temp.sst(ncpath, time0=2020, tim1=2020, tim2=2095, var=var)
-#   n34 = SST_inst.calc_n34()
-#   members_feedback.append(n34)
-#
-#print("...done")
+# feedback runs
+print("Calculating climatology for FEEDBACK")
+
+members_feedback = []
+for i in range(1,2):
+   ncpath = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0."+var+".202001-*.nc")[0]
+   SST_inst = surface_temp.sst(ncpath, tim1=2020, tim2=2099, var=var)
+   n34 = SST_inst.calc_n34()
+   members_feedback.append(n34)
+
+print("...done")
 #********************************************************************************************************

@@ -9,7 +9,7 @@ import plot_functions
 season = 'DJF'
 outdir="/Users/abanerjee/scripts/glens/output/"
 var = "TREFHT"
-p_value = 0.05
+alpha = 0.05
 
 #********************************************************************************************************
 # 1) ensemble mean raw field or end metric?
@@ -22,8 +22,8 @@ print("Calculating climatology for CONTROL")
 
 members_control = []
 for i in range(1,22):
-   ncpath = glob.glob("/Volumes/Data-Banerjee/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+".cam.h0."+var+".201001-*.nc")[0]
-   Ts_inst = surface_temp.Ts(ncpath, tim1=2010, tim2=2030)
+   ncpath = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+".cam.h0."+var+".201001-*.nc")[0]
+   Ts_inst = surface_temp.Ts(ncpath, tim1=2010, tim2=2030, var='TREFHT')
    clim_lon_lat = Ts_inst.climatology_lon_lat(season)
    members_control.append(clim_lon_lat)
 
@@ -103,8 +103,8 @@ print("Calculating climatology for GEOHEAT_S")
 members_geoheatS = []
 for i in range(1,4):
    for yr in range(2011,2031):
-      ncpath = glob.glob("/Volumes/Data-Banerjee/CESM-GLENS/SUE/"+str(i).zfill(3)+"/b.e15.B5505C5WCCML45BGCR.f09_g16.GEOHEATSUE."+str(i).zfill(3)+"_"+str(yr)+"/Combined/TREFHT.b.e15.B5505C5WCCML45BGCR.f09_g16.GEOHEATSUE."+str(i).zfill(3)+"_"+str(yr)+".nc")[0]
-      Ts_inst = surface_temp.Ts(ncpath, tim1=yr, tim2=yr+1)
+      ncpath = glob.glob("/Volumes/CESM-GLENS/SUE/"+str(i).zfill(3)+"/b.e15.B5505C5WCCML45BGCR.f09_g16.GEOHEATSUE."+str(i).zfill(3)+"_"+str(yr)+"/Combined/TREFHT.b.e15.B5505C5WCCML45BGCR.f09_g16.GEOHEATSUE."+str(i).zfill(3)+"_"+str(yr)+".nc")[0]
+      Ts_inst = surface_temp.Ts(ncpath, tim1=yr, tim2=yr+1, var='TREFHT')
       clim_lon_lat = Ts_inst.climatology_lon_lat(season)
       members_geoheatS.append(clim_lon_lat)
 
@@ -112,11 +112,12 @@ print("...done")
 
 ngeoheatS = len(members_geoheatS)
 ensmean_geoheatS, ensstd_geoheatS = ensemble_functions.stats(members_geoheatS)
-ensdiff_geoheatS = ensmean_geoheatS - ensmean_control
-ttest_geoheatS = ensemble_functions.t_test(p_value, ensdiff_geoheatS, ensstd_control, ensstd_geoheatS, ncontrol, ngeoheatS)
+ensdiff_geoheatS = (ensmean_geoheatS - ensmean_control) / 65.*30.
+ttest_geoheatS = ensemble_functions.t_test(alpha, ensdiff_geoheatS, ensstd_control, ensstd_geoheatS, ncontrol, ngeoheatS)
 
 print("Plotting ensemble mean difference GEOHEAT_S-CONTROL")
-plot_functions.plot_single_lat_lon(ensdiff_geoheatS, 'GEOHEAT_S (2010-2030) - Control (2010-2030)\n'+season, outdir+'Ts_ensdiff_geoheatS-control_'+season+'.png', 8, 1, 8, 1, '$^{\circ}$C', zsig=ttest_geoheatS)
+#plot_functions.plot_single_lat_lon(ensdiff_geoheatS, 'GEOHEAT_S (2010-2030) - Control (2010-2030)\n'+season, outdir+'Ts_ensdiff_geoheatS-control_'+season+'.png', 8, 1, 8, 1, '$^{\circ}$C', zsig=ttest_geoheatS)
+plot_functions.plot_single_lat_lon(ensdiff_geoheatS, 'GEOHEAT_S (2010-2030) - Control (2010-2030)\n'+season, outdir+'Ts_ensdiff_geoheatS-control_'+season+'.png', 2, 0.2, 2, 0.2, '$^{\circ}$C per 30 yrs', zsig=ttest_geoheatS)
 
 #********************************************************************************************************
 
