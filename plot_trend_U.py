@@ -21,7 +21,7 @@ alpha = 0.05
 print("Calculating climatology for control")
 
 members_control = []
-for i in range(1,22):
+for i in range(1,21):
    ncpath = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/p.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+".cam.h0zm."+var+".201001-*.nc")[0]
    print(ncpath)
    U_inst = zonal_wind.zmzw(ncpath, tim1=2010, tim2=2030, var='U')
@@ -31,13 +31,14 @@ for i in range(1,22):
 ncontrol = len(members_control)
 ensmean_control, ensstd_control = ensemble_functions.stats(members_control)
 
+'''
 #********************************************************************************************************
 # RCP8.5
 # only 3 members here!
 print("Calculating climatology for RCP8.5")
 
 members_rcp85 = []
-for i in [1,2,3,21]:
+for i in [1,2,3]:
    ncpath = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/p.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+".cam.h0zm."+var+".201001-*.nc")[0]
    print(ncpath)
    U_inst = zonal_wind.zmzw(ncpath, tim1=2020, tim2=2095, var='U')
@@ -48,14 +49,16 @@ nrcp85 = len(members_rcp85)
 ensmean_rcp85, ensstd_rcp85 = ensemble_functions.stats(members_rcp85)
 ttest_rcp85 = ensemble_functions.t_test_onesample(alpha, ensmean_rcp85, ensstd_rcp85, nrcp85) 
 
-plot_functions.plot_single_lat_hgt(ensmean_rcp85, ensmean_control, '(b) RCP8.5', outdir+'U_trend_rcp85_'+season+'.png', 5, 0.5, 60, 10, 'm s$^{-1}$ per 30 yrs', zsig=ttest_rcp85)
+plot_functions.plot_single_lat_hgt(ensmean_rcp85, ensmean_control, '(a) RCP8.5', outdir+'U_trend_rcp85_'+season+'.png', 5, 0.5, 60, 10, 'm s$^{-1}$ per 30 yrs', zsig=ttest_rcp85)
+plot_functions.plot_matrix_lat_hgt(members_rcp85, ensmean_control, ensmean_rcp85['lat'], ensmean_rcp85['level'], '',  outdir+'U_trend_rcp85_members_'+season+'.png', 5, 0.5, 60, 10, 'm s$^{-1}$ per 30 yrs')
+'''
 
 #********************************************************************************************************
 # feedback runs
 print("Calculating climatology for FEEDBACK")
 
 members_feedback = []
-for i in range(1,22):
+for i in range(1,21):
    ncpath = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/p.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0zm."+var+".202001-*.nc")[0]
    U_inst = zonal_wind.zmzw(ncpath, tim1=2020, tim2=2095, var='U')
    trend_lon_lat = U_inst.trend_lon_lat(season)
@@ -65,7 +68,9 @@ nfeedback = len(members_feedback)
 ensmean_feedback, ensstd_feedback = ensemble_functions.stats(members_feedback)
 ttest_feedback = ensemble_functions.t_test_onesample(alpha, ensmean_feedback, ensstd_feedback, nfeedback) 
 
-plot_functions.plot_single_lat_hgt(ensmean_feedback, ensmean_control, '(a) Feedback', outdir+'U_trend_feedback_'+season+'.png', 5, 0.5, 60, 10, 'm s$^{-1}$ per 30 yrs', zsig=ttest_feedback)
+plot_functions.plot_single_lat_hgt(ensmean_feedback, ensmean_control, '(b) Feedback', outdir+'U_trend_feedback_'+season+'.png', 5, 0.5, 60, 10, 'm s$^{-1}$ per 30 yrs', zsig=ttest_feedback)
+plot_functions.plot_matrix_lat_hgt(members_feedback, ensmean_control, ensmean_feedback['lat'], ensmean_feedback['level'], '',  outdir+'U_trend_feedback_members_'+season+'.png', 5, 0.5, 60, 10, 'm s$^{-1}$ per 30 yrs')
+
 #********************************************************************************************************
 
 ##********************************************************************************************************

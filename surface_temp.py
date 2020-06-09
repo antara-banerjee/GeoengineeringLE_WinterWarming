@@ -22,6 +22,7 @@ class Ts:
        newtime = xr.cftime_range(start=newtime_beg, periods=np.shape(oldtime)[0], freq='MS', calendar='noleap')
        self.var = self.var.assign_coords(time=newtime)
        #self.var, self.dimdict = basic_functions.extract_var_dims(ncpath, varname='TREFHT', xlonname='lon', xlatname='lat', xtimname='time')
+       #self.var = self.var.isel(lat=slice(0,2), lon=slice(0,2))
 
        yr_to_dec = 10
 
@@ -39,10 +40,25 @@ class Ts:
        return vseas
 
    #**************************************************
+   # climatological mean
+   def annual_lon_lat(self, time_mean):
+
+       # time subset
+       # this subsetting allows for DJF mean that includes only D of the firt year and JF of the last year plus one
+       vtsub = self.var.sel(time=slice(str(self.tim1)+'-03-01', str(self.tim2+1)+'-02-01'))
+
+       # annual, seasonal mean - pandas gives me RAGE
+       ASseas= {'DJF':'DEC',
+                'MAM':'MAR',
+                'JJA':'JUN',
+                'SON':'SEP'}
+       vseas = vtsub.sel(time=(vtsub['time.season']==time_mean)) # select based on boolean array
+       vyrmn = vseas.resample(time='AS-'+ASseas[time_mean]).mean()
+
+       return vyrmn
+   #**************************************************
    # trend
    def trend_lon_lat(self, time_mean):
-
-       print(time_mean)
 
        # time subset
        # this subsetting allows for DJF mean that includes only D of the firt year and JF of the last year plus one
@@ -61,7 +77,7 @@ class Ts:
        coeffs = np.polyfit(x, y, 1)
        trends = (coeffs[0,:]*30.).reshape(vyrmn.values.shape[1], vyrmn.values.shape[2])
        xrtrends = xr.DataArray(trends,coords=[('lat',vyrmn['lat']),('lon',vyrmn['lon'])])
-       print(xrtrends)
+       #print(xrtrends)
 
        ## trend
        #def ols_trend(xrobject):
@@ -146,14 +162,10 @@ class sst(Ts):
       sst_anom_nino34_mean = sst_anom_nino34.mean(dim=('lon', 'lat'))
 
       nino34 = sst_anom_nino34_mean.rolling(time=5).mean(dim='time')
-      Fn34 = open("nino34_feedback_001.txt","w")
-      Ftime = open("time_feedback_001.txt","w")
-      Fn34.write(str(list(nino34.values)))
+
+      Ftime = open("time_feedback.txt","w")
       Ftime.write(str(nino34['time'].values))
-      Fn34.close()
       Ftime.close()
-      print(list(nino34.values))
-      print(nino34['time'].values)
 
       # Plot the ENSO index 
       fig, ax = plt.subplots();
@@ -181,7 +193,5 @@ class sst(Ts):
 
       return(nino34)
       #
-
-def calc_n34_numpy: 
 
      

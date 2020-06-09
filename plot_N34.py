@@ -50,12 +50,19 @@ print("...done")
 # feedback runs
 print("Calculating climatology for FEEDBACK")
 
+Fn34 = open("nino34_feedback.txt","w")
+
 members_feedback = []
-for i in range(1,2):
+for i in range(1,22):
    ncpath = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0."+var+".202001-*.nc")[0]
    SST_inst = surface_temp.sst(ncpath, tim1=2020, tim2=2099, var=var)
    n34 = SST_inst.calc_n34()
    members_feedback.append(n34)
 
+   Fn34.write(str(list(n34.values))+'\n\n')
+
+Fn34.close()
+   #print(list(nino34.values))
+   #print(nino34['time'].values)
 print("...done")
 #********************************************************************************************************
