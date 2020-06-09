@@ -7,6 +7,7 @@ mpl.use('Agg')
 import surface_temp
 import ensemble_functions
 import plot_functions
+import xarray as xr
 
 #********************************************************************************************************
 season = 'DJF'
@@ -20,90 +21,54 @@ alpha = 0.05
 # 2) difference of averages or average of 400 differences?
 
 #********************************************************************************************************
-'''
-# control 
-print("Calculating climatology for CONTROL")
-
-members_control = []
-for i in range(1,22):
-   ncpath = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+".cam.h0."+var+".201001-*.nc")[0]
-   Ts_inst = surface_temp.Ts(ncpath, time0=2010, tim1=2010, tim2=2030)
-   #clim_lon_lat = Ts_inst.climatology_lon_lat(season)
-   trend_lon_lat = Ts_inst.trend_lon_lat(season)
-   members_control.append(trend_lon_lat)
-
-print("...done")
-
-#********************************************************************************************************
 # RCP8.5
 # only 3 members here!
 print("Calculating climatology for RCP8.5")
 
 members_rcp85 = []
-for i in [1,2,3,21]:
-   ncpath = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+".cam.h0."+var+".201001-*.nc")[0]
-   Ts_inst = surface_temp.Ts(ncpath, time0=2010, tim1=2075, tim2=2095)
-   clim_lon_lat = Ts_inst.climatology_lon_lat(season)
-   members_rcp85.append(clim_lon_lat)
+for i in [1,2,3]:
+   ncpath1 = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+".cam.h0."+var1+".201001-*.nc")[0]
+   ncpath2 = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+".cam.h0."+var2+".201001-*.nc")[0]
+   Ts_inst = surface_temp.ppt(ncpath1, ncpath2, tim1=2020, tim2=2095, ppt1='PRECC', ppt2='PRECL')
+   trend_lon_lat = Ts_inst.trend_lon_lat(season)
+   members_rcp85.append(trend_lon_lat)
 
 print("...done")
-'''
+
+nrcp85 = len(members_rcp85)
+ensmean_rcp85, ensstd_rcp85 = ensemble_functions.stats(members_rcp85) 
+ttest_rcp85= ensemble_functions.t_test_onesample(alpha, ensmean_rcp85, ensstd_rcp85, nrcp85) 
+
+plot_functions.plot_single_lat_lon(ensmean_rcp85, ensmean_rcp85['lat'], ensmean_rcp85['lon'], '', outdir+'ppt_trend_rcp85_'+season+'.png', 0.4, 0.05, 0.4, 0.1, 'Precipitation (mm/day per 30 yrs)', zsig=ttest_rcp85)
+plot_functions.plot_matrix_lat_lon(members_rcp85, ensmean_rcp85['lat'], ensmean_rcp85['lon'], '', outdir+'ppt_trend_rcp85_members_'+season+'.png', 0.4, 0.05, 0.4, 0.1, 'Precipitation (mm/day per 30 yrs)')
 
 #********************************************************************************************************
 # feedback runs
 print("Calculating climatology for FEEDBACK")
 
 members_feedback = []
-for i in range(1,22):
-   #ncpath = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0."+var+".202001-*.nc")[0]
-   ncpath1 = glob.glob("/Volumes/Data-Banerjee/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0."+var1+".202001-*.nc")[0]
-   ncpath2 = glob.glob("/Volumes/Data-Banerjee/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0."+var2+".202001-*.nc")[0]
+for i in range(1,21):
+   ncpath1 = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0."+var1+".202001-*.nc")[0]
+   ncpath2 = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0."+var2+".202001-*.nc")[0]
    Ts_inst = surface_temp.ppt(ncpath1, ncpath2, tim1=2020, tim2=2095, ppt1='PRECC', ppt2='PRECL')
    trend_lon_lat = Ts_inst.trend_lon_lat(season)
    members_feedback.append(trend_lon_lat)
 
 print("...done")
 
-#********************************************************************************************************
-# ensemble statistics
-'''
-# number
-ncontrol = len(members_control)
-nrcp85 = len(members_rcp85)
-'''
 nfeedback = len(members_feedback)
-
-'''
-# mean and stdev
-ensmean_rcp85, ensstd_rcp85 = ensemble_functions.stats(members_rcp85) 
-ensmean_control, ensstd_control = ensemble_functions.stats(members_control) 
-'''
 ensmean_feedback, ensstd_feedback = ensemble_functions.stats(members_feedback)
-
-'''
-# differences
-ensdiff_rcp85 = ensmean_rcp85 - ensmean_control
-ensdiff_feedback = ensmean_feedback - ensmean_control
-
-# two-tailed t-test
-ttest_rcp85 = ensemble_functions.t_test(p_value, ensdiff_rcp85, ensstd_control, ensstd_rcp85, ncontrol, nrcp85) 
-ttest_feedback = ensemble_functions.t_test(p_value, ensdiff_feedback, ensstd_control, ensstd_feedback, ncontrol, nfeedback) 
-'''
-
-# one-tailed t-test
 ttest_feedback = ensemble_functions.t_test_onesample(alpha, ensmean_feedback, ensstd_feedback, nfeedback) 
-print(ttest_feedback)
 
-# individual member differences
-#memdiff_rcp85 = [x - ensmean_control for x in members_rcp85]
-#memdiff_feedback = [x - ensmean_control for x in members_feedback]
+plot_functions.plot_single_lat_lon(ensmean_feedback, ensmean_feedback['lat'], ensmean_feedback['lon'], '', outdir+'ppt_trend_feedback_'+season+'.png', 0.4, 0.05, 0.4, 0.1, 'Precipitation (mm/day per 30 yrs)', zsig=ttest_feedback)
+plot_functions.plot_matrix_lat_lon(members_feedback, ensmean_feedback['lat'], ensmean_feedback['lon'], '', outdir+'ppt_trend_feedback_members_'+season+'.png', 0.4, 0.05, 0.4, 0.1, 'Precipitation (mm/day per 30 yrs)')
 
 #********************************************************************************************************
-# Plot ensemble mean difference FEEDBACK-CONTROL
-#print(lat.shape, lon.shape)
-#zsigones = np.ones([lat.shape[0],lon.shape[0]])
-
-print("Plotting ensemble mean trend FEEDBACK")
-plot_functions.plot_single_lat_lon(ensmean_feedback, 'Feedback ('+season+')', outdir+'Ts_trend_feedback_'+season+'.png', 0.5, 0.05, 0.5, 0.1, '$^{\circ}$C per 30 yrs', zsig=ttest_feedback)
-
+#t = xr.open_dataset('xrToE_ppt_trend_2stdev.nc')
+#t = t.where(t!=2095)
+#t = t.where(t!=2021)
+#t = t.where(t!=0)
+#t = t.where(ttest_feedback==0)
+#print(t)
+#plot_functions.plot_ToE(t.__xarray_dataarray_variable__,'ToE','ToE_ppt_trend_2stdev.png',2020,2095,5,'year')
 #********************************************************************************************************
