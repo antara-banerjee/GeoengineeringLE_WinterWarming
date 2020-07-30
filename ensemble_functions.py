@@ -69,10 +69,10 @@ def stats(xrobjects):
 
 #********************************************************************************************************
 # ttest variable is TRUE where NOT significant
-def t_test(p_value, diff, std1, std2, n1, n2):
+def t_test(alpha, diff, std1, std2, n1, n2):
     
     tstat = diff/np.sqrt((std1**2/n1)+(std2**2/n2))
-    tcrit = ss.t.ppf(1-p_value/2., n1+n2-2)#; print slope, std_err, tscore, tcrit
+    tcrit = ss.t.ppf(1-alpha/2., n1+n2-2)#; print slope, std_err, tscore, tcrit
     ttest = tstat < tcrit
 
     return ttest
