@@ -25,7 +25,6 @@ import custom_colors as ccol
 
 #*********************************************************************************
 # inputs
-time_mean = 'DJF'
 varcode="Z3"
 
 # load saved EOF calculated from NAM_zm_all_months.py
@@ -57,16 +56,22 @@ def projection(filename):
    nplat = var['lat'].values
  
    # remove global mean
-   global coslat; coslat = np.cos(np.deg2rad(nplat))
-   global coslatarray; coslatarray = coslat[np.newaxis,np.newaxis,:]
-   gm = np.sum(npvar*coslatarray, axis=2)/np.sum(coslatarray); print('gm shape: ',gm.shape)
+   coslat = np.cos(np.deg2rad(nplat))
+   NaNmask = np.isnan(npvar) # true where NaN
+   coslatarray = np.tile(coslat, npvar.shape[0]*npvar.shape[1]).reshape((npvar.shape[0], npvar.shape[1], npvar.shape[2]))
+   coslatarray[NaNmask] = np.nan # mask with NaN where variable is NaN
+   gm = np.nansum(npvar*coslatarray, axis=2)/np.nansum(coslatarray, axis=2)
    npvar = npvar - gm[:,:,np.newaxis]
 
-   # latitude subset 
-   npvar = npvar[:,:,np.where(nplat>=20)[0]]
-   global nplathem; nplathem = nplat[nplat>20]
-   #coslatarray = coslatarray[:,:,nplat>20]
-   #coslat = coslat[nplat>20]
+   # almost same results when simply using np.nansum but not quite accurate
+   #coslatarray = coslat[np.newaxis,np.newaxis,:]
+   #gm = np.nansum(npvar*coslatarray, axis=2)/np.sum(coslatarray)
+   #npvar = npvar - gm[:,:,np.newaxis]
+
+   # latitude subset (llat to N Pole) 
+   llat = 20
+   npvar = npvar[:,:,np.where(nplat>=llat)[0]]
+   nplatsub= nplat[nplat>llat]
 
    # deseasonalize
    npvarDS = np.empty_like(npvar)
@@ -91,41 +96,40 @@ def projection(filename):
 #*********************************************************************************
 # GLENS Feedback files 
 slopes = []
-for i in range(1,21):
+for i in range(1,2):
    print('Feedback run ',i)
    filename = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/p.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0."+varcode+".202001-*.nc")[0] 
    slope = projection(filename)
-   np.save('slope_feedback_'+str(i), slope)
+   #np.save('slope_feedback_'+str(i), slope)
    #slope = np.load('slope_feedback_'+str(i)+'.npy')
    slopes.append(slope)
 
 #*********************************************************************************
 # Ensemble mean slopes
-
-# for single ensemble member to test
-#PC_mean, PC_std = ensemble_functions.stats(PCs)
-#slope_mean = slopes[0]
-
 slope_mean = np.mean(np.array(slopes), axis=0)
 
 # roll so that July is first (currently begins in March)
-print(slope_mean[0,4])
+print('check a July value ',slope_mean[0,4])
 slope_mean = np.roll(slope_mean,-4,axis=1)
-print(slope_mean[0,0])
+print('check a July value ',slope_mean[0,0])
+
+# add July value to end to make cyclic for plotting 
+slope_mean = np.concatenate((slope_mean, slope_mean[:,0][:,np.newaxis]), axis=1)
+print('check a July value ',slope_mean[0,12])
 
 #*********************************************************************************
 # Plot
 yticklabels = [1000,700,500,300,100,70,50,30,10,7,5,3,1]
 cols = ccol.custom_colors('matlab')
-fig = plt.figure(figsize=(6,4))
-shading = plt.contourf(range(12),-np.log10(nplevel),slope_mean,cmap=cols, extend='both', levels=np.arange(-1.8,2,0.2))
-#shading = plt.contourf(range(12),-np.log10(nplevel),slope_mean,cmap=cols, extend='both', levels=np.arange(-0.4,0.45,0.05))
+fig = plt.figure(figsize=(8,4))
+shading = plt.contourf(range(13),-np.log10(nplevel),slope_mean,cmap=cols, extend='both', levels=np.arange(-1.8,2,0.2))
 plt.yticks(-np.log10(yticklabels), yticklabels)
 plt.xticks(range(12),['J','A','S','O','N','D','J','F','M','A','M','J'])
 plt.colorbar(shading)
 plt.ylim([-np.log10(1000), -np.log10(1)])
 plt.xlabel('Month')
 plt.ylabel('Pressure')
+plt.tight_layout()
 plt.savefig('NAM_feedback.png')
 plt.close()
 
