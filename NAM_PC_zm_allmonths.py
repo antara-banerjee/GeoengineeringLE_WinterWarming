@@ -77,7 +77,7 @@ def projection(filename):
    PCfeedback = np.empty([len(nptime), len(nplevel)]) 
    for ilevel in range(len(nplevel)):
       PC = np.dot(npvarDS[:,ilevel,:], eof1[ilevel,...]) # project
-      PCfeedback[:,ilevel] = (PC-PC[12*21:].mean())/PC[12*21:].std() # standardize
+      PCfeedback[:,ilevel] = (PC-PC[:12*21].mean())/PC[:12*21].std() # standardize
 
    # trend for each level and each month
    slope = np.empty([len(nplevel), 12])
@@ -93,10 +93,9 @@ slopes = []
 for i in range(1,21):
    print('Feedback run ',i)
    filename = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/p.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0."+varcode+".202001-*.nc")[0] 
-   #slope = projection(filename)
-   #np.load('nplevel', nplevel)
-   #np.save('slope_feedback_'+str(i), slope)
-   slope = np.load('slope_feedback_'+str(i)+'.npy')
+   slope = projection(filename)
+   np.save('slope_feedback_'+str(i), slope)
+   #slope = np.load('slope_feedback_'+str(i)+'.npy')
    slopes.append(slope)
 
 #*********************************************************************************
