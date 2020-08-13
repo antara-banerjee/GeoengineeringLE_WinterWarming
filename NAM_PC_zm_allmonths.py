@@ -57,9 +57,10 @@ def projection(filename):
    nplat = var['lat'].values
  
    # remove global mean
-   #global coslat; coslat = np.cos(np.deg2rad(nplat))
-   #global coslatarray; coslatarray = coslat[np.newaxis,np.newaxis,:]
-   #npvar = npvar - npvar*coslatarray/np.sum(coslatarray)
+   global coslat; coslat = np.cos(np.deg2rad(nplat))
+   global coslatarray; coslatarray = coslat[np.newaxis,np.newaxis,:]
+   gm = np.sum(npvar*coslatarray, axis=2)/np.sum(coslatarray); print('gm shape: ',gm.shape)
+   npvar = npvar - gm[:,:,np.newaxis]
 
    # latitude subset 
    npvar = npvar[:,:,np.where(nplat>=20)[0]]
@@ -116,9 +117,9 @@ print(slope_mean[0,0])
 # Plot
 yticklabels = [1000,700,500,300,100,70,50,30,10,7,5,3,1]
 cols = ccol.custom_colors('matlab')
-fig = plt.figure()
-#shading = plt.contourf(range(12),-np.log10(nplevel),slope_mean,cmap=cols, extend='both')#, levels=np.arange(-1.8,2,0.2))
-shading = plt.contourf(range(12),-np.log10(nplevel),slope_mean,cmap=cols, extend='both', levels=np.arange(-0.4,0.45,0.05))
+fig = plt.figure(figsize=(6,4))
+shading = plt.contourf(range(12),-np.log10(nplevel),slope_mean,cmap=cols, extend='both', levels=np.arange(-1.8,2,0.2))
+#shading = plt.contourf(range(12),-np.log10(nplevel),slope_mean,cmap=cols, extend='both', levels=np.arange(-0.4,0.45,0.05))
 plt.yticks(-np.log10(yticklabels), yticklabels)
 plt.xticks(range(12),['J','A','S','O','N','D','J','F','M','A','M','J'])
 plt.colorbar(shading)
