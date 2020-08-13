@@ -27,7 +27,8 @@ import custom_colors as ccol
 # inputs
 time_mean = 'DJF'
 varcode="Z3"
-eof1 = np.load('NAM_zm_EOF_nogm.npy')
+eof1 = np.load('NAM_zm_EOF_nogm_unitless.npy')
+nplevel = np.load('nplevel.npy')
 
 #*************************************************************************************
 # GLENS Feedback file
@@ -57,48 +58,56 @@ def projection(filename):
    nptime = var['time'].values
    global nplevel; nplevel = var['level'].values
    nplat = var['lat'].values
-
+ 
    # remove global mean
    global coslat; coslat = np.cos(np.deg2rad(nplat))
    global coslatarray; coslatarray = coslat[np.newaxis,np.newaxis,:]
    #npvar = npvar - npvar*coslatarray/np.sum(coslatarray)
 
    # latitude subset 
-   npvar = npvar[:,:,np.where(nplat>=0)[0]]
-   global nplathem; nplathem = nplat[nplat>0]
-   coslatarray = coslatarray[:,:,nplat>0]
-   coslat = coslat[nplat>0]
+   npvar = npvar[:,:,np.where(nplat>=20)[0]]
+   global nplathem; nplathem = nplat[nplat>20]
+   coslatarray = coslatarray[:,:,nplat>20]
+   coslat = coslat[nplat>20]
 
    # group by month and deseasonalize
-   var_monthly = np.empty([int(len(nptime)/12), len(nplevel), len(nplathem), 12])
-   for i in range(12):
-      var_monthly[...,i] = npvar[i::12,...] - npvar[i::12,...].mean(axis=0)
+   #var_monthly = np.empty([int(len(nptime)/12), len(nplevel), len(nplathem), 12])
+   #for i in range(12):
+   #   var_monthly[...,i] = npvar[i::12,...] - npvar[i::12,...].mean(axis=0)
+   #
+   # projection 
+   #PCfeedback = np.empty([int(len(nptime)/12), len(nplevel), 12])
+   #for ilevel in range(len(nplevel)):
+   #   for imonth in range(12):
+   #      PC = np.dot(var_monthly[:,ilevel,:,imonth], eof1[ilevel,...]) 
+   #      PCfeedback[:,ilevel,imonth] = (PC-PC.mean())/PC.std()
    
    # deseasonalize
-   #npvarDS = np.empty_like(npvar)
-   #for i in range(len(nptime)):
-   #   j = i%12
-   #   npvarDS[i,...] = npvar[i,...] - npvar[j::12,...].mean(axis=0)
+   npvarDS = np.empty_like(npvar)
+   for i in range(len(nptime)):
+      j = i%12
+      npvarDS[i,...] = npvar[i,...] - npvar[j::12,...].mean(axis=0)
 
-   print(npvarDS.shape)
-
-   PCfeedback = np.empty([int(len(nptime)/12), len(nplevel), 12])
+   # project, standardize
+   PCfeedback = np.empty([len(nptime), len(nplevel)]) # project
    for ilevel in range(len(nplevel)):
-      for imonth in range(12):
-         PC = np.dot(var_monthly[:,ilevel,:,imonth], eof1[ilevel,...]) 
-   #      PCfeedback[:,ilevel,imonth] = PC
-         PCfeedback[:,ilevel,imonth] = (PC-PC.mean())/PC.std()
+      PC = np.dot(npvarDS[:,ilevel,:], eof1[ilevel,...]) 
+      PCfeedback[:,ilevel] = (PC-PC[12*21:].mean())/PC[12*21:].std() # standardize
 
    slope = np.empty([len(nplevel), 12])
    for ilevel in range(len(nplevel)):
       for imonth in range(12):
-         slope[ilevel,imonth] = (ss.linregress(range(int(len(nptime)/12)), PCfeedback[:,ilevel,imonth])[0]) * 30  
+         slope[ilevel,imonth] = (ss.linregress(range(int(len(nptime)/12)), PCfeedback[imonth::12,ilevel])[0]) * 30  
 
    return slope
 
-for i in range(1,2):
-   filename = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/p.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0."+variable+".202001-*.nc")[0] 
-   slope = projection(filename)
+for i in range(1,21):
+   print('Feedback run ',i)
+   filename = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/p.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0."+varcode+".202001-*.nc")[0] 
+   #slope = projection(filename)
+   #np.load('nplevel', nplevel)
+   #np.save('slope_feedback_'+str(i), slope)
+   slope = np.load('slope_feedback_'+str(i)+'.npy')
    slopes.append(slope)
 
 # for single ensemble member to test
@@ -113,7 +122,8 @@ print(slope_mean[0,0])
 yticklabels = [1000,700,500,300,100,70,50,30,10,7,5,3,1]
 cols = ccol.custom_colors('matlab')
 fig = plt.figure()
-shading = plt.contourf(range(12),-np.log10(nplevel),slope_mean,cmap=cols, extend='both')#, levels=np.arange(-1.8,2,0.2))
+#shading = plt.contourf(range(12),-np.log10(nplevel),slope_mean,cmap=cols, extend='both')#, levels=np.arange(-1.8,2,0.2))
+shading = plt.contourf(range(12),-np.log10(nplevel),slope_mean,cmap=cols, extend='both', levels=np.arange(-0.4,0.45,0.05))
 plt.yticks(-np.log10(yticklabels), yticklabels)
 plt.xticks(range(12),['J','A','S','O','N','D','J','F','M','A','M','J'])
 plt.colorbar(shading)

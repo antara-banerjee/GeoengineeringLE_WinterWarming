@@ -59,10 +59,10 @@ def calc_anom(filename):
    #npvar = npvar - gm[:,:,np.newaxis]
 
    # latitude subset 
-   npvar = npvar[:,:,np.where(nplat>=0)[0]]
-   global nplathem; nplathem = nplat[nplat>0]
-   coslatarray = coslatarray[:,:,nplat>0]
-   coslat = coslat[nplat>0]
+   npvar = npvar[:,:,np.where(nplat>=20)[0]]
+   global nplathem; nplathem = nplat[nplat>20]
+   coslatarray = coslatarray[:,:,nplat>20]
+   coslat = coslat[nplat>20]
 
    # deseasonalize
    npvarDS = np.empty_like(npvar)
@@ -75,9 +75,9 @@ def calc_anom(filename):
 #*************************************************************************************
 # Anomalies for input into EOF calculation
 anoms = []
-nBase = 20
+nBase = 20 
 for i in range(1,nBase+1):
-   filename = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/p.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+".cam.h0."+variable+".201001-*.nc")[0] 
+   filename = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/p.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+".cam.h0."+varcode+".201001-*.nc")[0] 
    print('Base run ',i)
    anom = calc_anom(filename)
    anoms.append(anom)
@@ -96,18 +96,18 @@ for ilevel in range(len(nplevel)):
    # EOF
    solver =  Eof(anoms[:,ilevel,:], weights=wgts)
    eof1[ilevel,:] = solver.eofs(neofs=1, eofscaling=0)[0]
-   if eof1[ilevel,np.where(nplathem>=70)[0][0]] > 0:
+   if eof1[ilevel,np.where(nplathem>=80)[0][0]] > 0:
        eof1[ilevel,:] = -eof1[ilevel,:]
 
    # standardized PC
-   #PC1 = np.dot(anoms[:,ilevel,:], eof1[ilevel,:])
-   #PC1 = (PC1-PC1.mean())/PC1.std()
+   PC1 = np.dot(anoms[:,ilevel,:], eof1[ilevel,:])
+   PC1 = (PC1-PC1.mean())/PC1.std()
 
    # regression
-   #for ilat in range(len(nplathem)):
-   #   eof1[ilevel,ilat] = ss.linregress(PC1, anoms[:,ilevel,ilat])[0]
+   for ilat in range(len(nplathem)):
+      eof1[ilevel,ilat] = ss.linregress(PC1, anoms[:,ilevel,ilat])[0]
 
-#np.save('NAM_zm_EOF_nogm_unitless', eof1)
+np.save('NAM_zm_EOF_nogm', eof1)
 
 '''
 # same as above; need to figure out handling of missing values
