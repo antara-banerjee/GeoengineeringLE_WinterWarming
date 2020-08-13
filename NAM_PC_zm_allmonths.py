@@ -27,12 +27,12 @@ import custom_colors as ccol
 # inputs
 time_mean = 'DJF'
 varcode="Z3"
+
+# load saved EOF calculated from NAM_zm_all_months.py
 eof1 = np.load('NAM_zm_EOF_nogm_unitless.npy')
 nplevel = np.load('nplevel.npy')
 
 #*************************************************************************************
-# GLENS Feedback file
-slopes = []
 def projection(filename):
    
    # extract variable  
@@ -50,9 +50,6 @@ def projection(filename):
    # zonal mean
    var = var.mean(dim='lon', skipna=True)
 
-   # latitude subset
-   #var = var.sel(lat=slice(0,90))
-
    # convert variable and dimensions to numpy arrays - try later with xarray (xr.apply_ufunc)
    npvar = var.values
    nptime = var['time'].values
@@ -60,40 +57,29 @@ def projection(filename):
    nplat = var['lat'].values
  
    # remove global mean
-   global coslat; coslat = np.cos(np.deg2rad(nplat))
-   global coslatarray; coslatarray = coslat[np.newaxis,np.newaxis,:]
+   #global coslat; coslat = np.cos(np.deg2rad(nplat))
+   #global coslatarray; coslatarray = coslat[np.newaxis,np.newaxis,:]
    #npvar = npvar - npvar*coslatarray/np.sum(coslatarray)
 
    # latitude subset 
    npvar = npvar[:,:,np.where(nplat>=20)[0]]
    global nplathem; nplathem = nplat[nplat>20]
-   coslatarray = coslatarray[:,:,nplat>20]
-   coslat = coslat[nplat>20]
+   #coslatarray = coslatarray[:,:,nplat>20]
+   #coslat = coslat[nplat>20]
 
-   # group by month and deseasonalize
-   #var_monthly = np.empty([int(len(nptime)/12), len(nplevel), len(nplathem), 12])
-   #for i in range(12):
-   #   var_monthly[...,i] = npvar[i::12,...] - npvar[i::12,...].mean(axis=0)
-   #
-   # projection 
-   #PCfeedback = np.empty([int(len(nptime)/12), len(nplevel), 12])
-   #for ilevel in range(len(nplevel)):
-   #   for imonth in range(12):
-   #      PC = np.dot(var_monthly[:,ilevel,:,imonth], eof1[ilevel,...]) 
-   #      PCfeedback[:,ilevel,imonth] = (PC-PC.mean())/PC.std()
-   
    # deseasonalize
    npvarDS = np.empty_like(npvar)
    for i in range(len(nptime)):
       j = i%12
       npvarDS[i,...] = npvar[i,...] - npvar[j::12,...].mean(axis=0)
 
-   # project, standardize
-   PCfeedback = np.empty([len(nptime), len(nplevel)]) # project
+   # project and standardize by 2020-2040 period
+   PCfeedback = np.empty([len(nptime), len(nplevel)]) 
    for ilevel in range(len(nplevel)):
-      PC = np.dot(npvarDS[:,ilevel,:], eof1[ilevel,...]) 
+      PC = np.dot(npvarDS[:,ilevel,:], eof1[ilevel,...]) # project
       PCfeedback[:,ilevel] = (PC-PC[12*21:].mean())/PC[12*21:].std() # standardize
 
+   # trend for each level and each month
    slope = np.empty([len(nplevel), 12])
    for ilevel in range(len(nplevel)):
       for imonth in range(12):
@@ -101,6 +87,9 @@ def projection(filename):
 
    return slope
 
+#*********************************************************************************
+# GLENS Feedback files 
+slopes = []
 for i in range(1,21):
    print('Feedback run ',i)
    filename = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/p.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0."+varcode+".202001-*.nc")[0] 
@@ -110,15 +99,22 @@ for i in range(1,21):
    slope = np.load('slope_feedback_'+str(i)+'.npy')
    slopes.append(slope)
 
+#*********************************************************************************
+# Ensemble mean slopes
+
 # for single ensemble member to test
 #PC_mean, PC_std = ensemble_functions.stats(PCs)
 #slope_mean = slopes[0]
+
 slope_mean = np.mean(np.array(slopes), axis=0)
+
 # roll so that July is first (currently begins in March)
 print(slope_mean[0,4])
 slope_mean = np.roll(slope_mean,-4,axis=1)
 print(slope_mean[0,0])
 
+#*********************************************************************************
+# Plot
 yticklabels = [1000,700,500,300,100,70,50,30,10,7,5,3,1]
 cols = ccol.custom_colors('matlab')
 fig = plt.figure()
@@ -130,8 +126,6 @@ plt.colorbar(shading)
 plt.ylim([-np.log10(1000), -np.log10(1)])
 plt.xlabel('Month')
 plt.ylabel('Pressure')
-#plt.show()
 plt.savefig('NAM_feedback.png')
 plt.close()
-#plt.savefig('NAO_'+time_mean+'_EOFBase.png')
 
