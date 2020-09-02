@@ -46,7 +46,7 @@ members = []
 
 # RCP8.5
 if run=='rcp85':
-   print("Calculating climatology for RCP8.5")
+   print("Calculating trend for RCP8.5")
    for i in [1,2,3]:
       # Precip
       if varcode=='precip':
@@ -61,7 +61,7 @@ if run=='rcp85':
       members.append(trend)
 # Feedback
 elif run=='feedback':
-   print("Calculating climatology for Feedback")
+   print("Calculating trend for Feedback")
    for i in range(1,21):
       # Precip
       if varcode=='precip':
