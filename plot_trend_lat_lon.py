@@ -5,8 +5,8 @@ import ensemble_functions
 import plot_functions
 
 #********************************************************************************************************
-run = 'feedback'
-season = 'JJA'
+run = 'rcp85'
+season = 'DJF'
 outdir="/Users/abanerjee/scripts/glens/output/"
 varcode = 'precip'
 alpha = 0.05
@@ -32,9 +32,9 @@ contours  = {'TREFHT'  :{'rcp85':(8,1), 'feedback':(2,0.4)},\
              'precip'  :{'rcp85':(0.4,0.1), 'feedback':(0.4,0.1)},\
              'PSL'     :{'rcp85':(1.6,0.4), 'feedback':(1.6,0.4)}}
 
-colorscale= {'TREFHT'  :'matlab',\
-             'precip'  :'precip',\
-             'PSL'     :'matlab'}
+colorscale= {'TREFHT'  :'BlueRed',\
+             'precip'  :'BrownGreen',\
+             'PSL'     :'BlueRed'}
 
 clabel    = {'TREFHT'  :'$^{\circ}$C per 30 yrs',\
              'precip'  :'mm/day per 30 yrs',\

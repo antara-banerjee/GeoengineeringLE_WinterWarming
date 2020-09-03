@@ -19,16 +19,13 @@ import matplotlib as mpl
 # One plot, latitude-height cross section
 def plot_single_lat_hgt(z, zbase, title, outname, flim, fby, clim, cby, clabel, zsig, colorbar=True):
 
-   #fig = plt.figure(figsize=(4, 4), dpi=300)
    fig = plt.figure(figsize=(4.5, 3.5), dpi=300)
 
    # some plot parameters
    cdp = 0
    levs = np.arange(-flim,flim+fby,fby)
    clevs = np.arange(-clim,clim+cby,cby)
-   #levs = np.insert(levs, (np.where(levs==0)[0]), -0.1)
-   #levs = np.insert(levs, (np.where(levs==0)[0]+1), 0.1)
-   print(levs)
+
    #cbarticks = np.arange(-lim,lim+by,by)
    bottom = 1000
    top = 0.1
@@ -36,12 +33,12 @@ def plot_single_lat_hgt(z, zbase, title, outname, flim, fby, clim, cby, clabel, 
    xlab     = 'Latitude'
    ylab     = 'Pressure (hPa)'
 
-   cols     = ccol.custom_colors('matlab')
+   cols     = ccol.custom_colors('BlueRed')
 
    #plt_ax = fig.add_axes([0.14, 0.25, 0.75, 0.65]) # left, bottom, width, height
    plt_ax = fig.add_axes([0.12, 0.15, 0.65, 0.75]) # left, bottom, width, height
-   #cplot=plt.contourf(z.lat, -np.log10(z.level), z, levs, extend="both", cmap=cols)#, ax=plt_ax)
    cplot=plt.contourf(z.lat, -np.log10(z.level), z, levs, extend="both", cmap=cols)#, ax=plt_ax)
+   #cplot2=plt.contour(z.lat, -np.log10(z.level), z, clevs, colors='black', hold='on', linewidths=0.5)#, ax=plt_ax)
    cplot2=plt.contour(zbase.lat, -np.log10(zbase.level), zbase, clevs, colors='black', hold='on', linewidths=0.5)#, ax=plt_ax)
    plt.clabel(cplot2, fontsize=6, fmt='%.'+str(0)+'f') # add cdp into arguments
    plt.title(title, fontsize=12)
@@ -64,6 +61,7 @@ def plot_single_lat_hgt(z, zbase, title, outname, flim, fby, clim, cby, clabel, 
       #cbar=plt.colorbar(cplot, cax=cbar_ax, orientation='horizontal', ticks=-np.arange(-5,6,1))
       cbar_ax = fig.add_axes([0.83, 0.15, 0.04, 0.75])
       cbar=plt.colorbar(cplot, cax=cbar_ax, orientation='vertical', ticks=-np.arange(-5,6,1))
+      #cbar=plt.colorbar(cplot, cax=cbar_ax, orientation='vertical', ticks=levs)
       cbar.set_label(clabel,size=10)#,labelpad=-0.09)
       cbar.ax.tick_params(labelsize=10)
    plt.savefig(outname)
@@ -72,7 +70,7 @@ def plot_single_lat_hgt(z, zbase, title, outname, flim, fby, clim, cby, clabel, 
 #********************************************************************************************************
 def plot_matrix_lat_hgt(members, zbase, lat, hgt, title, outname, flim, fby, clim, cby, clabel):
 
-   cols     = ccol.custom_colors('matlab')
+   cols     = ccol.custom_colors('BlueRed')
    bottom = 1000
    top = 0.1
 
@@ -168,16 +166,14 @@ def plot_matrix_lat_hgt(members, zbase, lat, hgt, title, outname, flim, fby, cli
 
 #********************************************************************************************************
 # One plot, latitude-longitude map 
-def plot_single_lat_lon(z, zlat, zlon, title, outname, flim, fby, clim, cby, clabel, zsig=0, colorbar=True):
+def plot_single_lat_lon(z, zlat, zlon, title, outname, flim, fby, clim, cby, clabel, zsig=0, colorscale='matlab'):
     
    fig = plt.figure(figsize=(6, 6))
 
    # some plot parameters
    levs = np.arange(-flim,flim+fby,fby)
    cticks = np.arange(-clim,clim+cby,cby)
-   #cols     = ccol.custom_colors('grads')
-   cols     = ccol.custom_colors('matlab')
-   #cols     = ccol.custom_colors('precip')
+   cols     = ccol.custom_colors(colorscale)
    
    # set up map
    prj = ccrs.NorthPolarStereo()
@@ -185,7 +181,6 @@ def plot_single_lat_lon(z, zlat, zlon, title, outname, flim, fby, clim, cby, cla
    ax = fig.add_axes([0.05, 0.05, 0.9, 0.90], projection=prj) # left, bottom, width, height
    ax.coastlines()
    
-   # set bound (such a pain in cartopy...)
    # has to be done before data to plot added for use_as_clip_path to work
    llon=-180
    ulon=180
@@ -209,21 +204,19 @@ def plot_single_lat_lon(z, zlat, zlon, title, outname, flim, fby, clim, cby, cla
    #z.plot.contourf(transform=ccrs.PlateCarree(), levels=levs, cmap=cols)#, levels=levs)) # does not work with cyclic_z which is not an xarray object
 
    cplot = ax.contourf(cyclic_lon, zlat, cyclic_z, transform=ccrs.PlateCarree(), extend='both', levels=levs, cmap=cols)
-   #cplot = ax.contourf(cyclic_lon, z.lat, cyclic_z, transform=ccrs.PlateCarree(), extend='both', levels=levs, cmap=cols)
-   #cplot = ax.contourf(cyclic_lon, z['Latitude'], cyclic_z, transform=ccrs.PlateCarree(), extend='both', levels=levs, cmap=cols)
+   #cplot = ax.contour(cyclic_lon, zlat, cyclic_z, transform=ccrs.PlateCarree(), extend='both', colors=('b','w','r', (-1000, 0, 1000)))
    plt.title(title, fontsize=18)
 
    # Shade OUT non-significance
-   #cyclic_zsig, cyclic_tlon = add_cyclic_point(zsig, coord=zlon)
-   #cplot_t = ax.contourf(cyclic_lon, zlat, cyclic_zsig, transform=ccrs.PlateCarree(),levels=[-1,0,1],hatches=[None,'.'],colors='none')
+   cyclic_zsig, cyclic_tlon = add_cyclic_point(zsig, coord=zlon)
+   cplot_t = ax.contourf(cyclic_lon, zlat, cyclic_zsig, transform=ccrs.PlateCarree(),levels=[-1,0,1],hatches=[None,'..'],colors='none')
 
    # colorbar
-   if colorbar:
-      #cbar_ax = fig.add_axes([0.05, 0.13, 0.9, 0.04]) # left, bottom, width, height
-      #cbar=plt.colorbar(cplot, cax=cbar_ax, orientation='horizontal', ticks=cticks)
-      cbar=plt.colorbar(cplot, orientation='vertical', ticks=cticks)
-      cbar.set_label(clabel,size=14)#,labelpad=-0.09)
-      cbar.ax.tick_params(labelsize=14)
+   #cbar_ax = fig.add_axes([0.05, 0.13, 0.9, 0.04]) # left, bottom, width, height
+   #cbar=plt.colorbar(cplot, cax=cbar_ax, orientation='horizontal', ticks=cticks)
+   cbar=plt.colorbar(cplot, orientation='vertical', ticks=cticks)
+   cbar.set_label(clabel,size=14)#,labelpad=-0.09)
+   cbar.ax.tick_params(labelsize=14)
    
    plt.savefig(outname, dpi=300)
    plt.close()
@@ -253,7 +246,7 @@ def plot_single_hgt_mon(z, zbase, hgt, title, outname, flim, fby, clim, cby, cla
    xlab     = 'Latitude'
    ylab     = 'Pressure (hPa)'
 
-   cols     = ccol.custom_colors('grads')
+   cols     = ccol.custom_colors('BlueRed')
 
    #plt_ax = fig.add_axes([0.18, 0.25, 0.75, 0.68]) # left, bottom, width, height
    plt_ax = fig.add_axes([0.12, 0.25, 0.83, 0.65]) # left, bottom, width, height
@@ -298,7 +291,7 @@ def plot_single_hgt_mon(z, zbase, hgt, title, outname, flim, fby, clim, cby, cla
 #********************************************************************************************************
 def plot_matrix_hgt_mon(members, zbase, hgt, title, outname, flim, fby, clim, cby, clabel):
 
-   cols     = ccol.custom_colors('grads')
+   cols     = ccol.custom_colors('BlueRed')
    bottom = 1000
    top = 0.1
 
@@ -351,8 +344,8 @@ def plot_matrix_lat_lon(members, zlat, zlon, title, outname, flim, fby, clim, cb
    # some plot parameters
    levs = np.arange(-flim,flim+fby,fby)
    cticks = np.arange(-clim,clim+cby,cby)
-   #cols     = ccol.custom_colors('matlab')
-   cols     = ccol.custom_colors('precip')
+   #cols     = ccol.custom_colors('BlueRed')
+   cols     = ccol.custom_colors('GreenBrown')
 
    def plot_single_member(z, inens, count):
       print(z.shape)
@@ -437,7 +430,7 @@ def plot_ToE(z, title, outname, llim, ulim, by, clabel, zsig=0, colorbar=True, p
    #levs = np.array([0.,  0.2, 0.4, 0.6, 0.8, 1.,  1.2, 1.4, 1.6, 1.8, 2., 2.2 ])
    #cticks = np.array([0.,  0.2, 0.4, 0.6, 0.8, 1.,  1.2, 1.4, 1.6, 1.8, 2., 2.2 ]) 
    print(levs)
-   cols     = ccol.custom_colors('matlab')
+   cols     = ccol.custom_colors('BlueRed')
    
    # set up map
    if projection=='PlateCarree':
@@ -477,27 +470,5 @@ def plot_ToE(z, title, outname, llim, ulim, by, clabel, zsig=0, colorbar=True, p
    plt.close()
 
 #********************************************************************************************************
-# Old functions
-   #map = Basemap(projection='cyl',llcrnrlat=llat,urcrnrlat=ulat,llcrnrlon=llon,urcrnrlon=ulon, fix_aspect=False)
-   ## cylindrical is regular in latitude/longitude so no complicated mapping onto map coordinates
-   #x, y = map(glon,glat)
-   #plt_ax = fig.add_axes([0.12, 0.27, 0.83, 0.65]) # left, bottom, width, height
-   #cplot=map.contourf(x,y,ibase,levs,extend="both", cmap=cols, ax=plt_ax)
-   ## plot coastlines, draw label meridians and parallels.
-   #map.drawcoastlines(linewidth=1,color="black")
-   #map.drawparallels(np.arange(-90,100,30),labels=[1,0,0,0],fontsize=22,linewidth=0)
-   #map.drawmeridians(np.arange(-180,240,60),labels=[0,0,0,1],fontsize=22,linewidth=0)
-   #map.drawmapboundary()
-
-   #cs = map.contourf(x,y,itvals.astype(int),levels=[-1,0,1],hatches=[None,'.'],colors='none') 
-   #for m in range(len(itlon)-1):
-   #   for n in range(len(lat)-1):
-   #   #for n in range(iEQ+1):
-   #      print(m, n)
-   #      if itvals[n,m]:
-   #         x1 = itlon[m]
-   #         x2 = itlon[m+1]
-   #         y1 = lat[n]
-   #         y2 = lat[n+1]
-   #         plt.fill([x1,x2,x2,x1],[y1,y1,y2,y2],edgecolor='grey',fill=False,hatch='//',linewidth=0)
-   #         plt.fill([x1,x2,x2,x1],[y1,y1,y2,y2],edgecolor='grey',fill=False,hatch='\\',linewidth=0)
+# END
+#********************************************************************************************************
