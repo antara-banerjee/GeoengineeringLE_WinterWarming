@@ -3,6 +3,7 @@ import xarray as xr
 import vartimeproc 
 import ensemble_functions
 import plot_functions
+import trend_defs
 
 #********************************************************************************************************
 run = 'rcp85'
@@ -42,46 +43,8 @@ clabel    = {'TREFHT'  :'$^{\circ}$C per 30 yrs',\
 
 #********************************************************************************************************
 # Calculate trend for each member 
-members = []
-
-# RCP8.5
-if run=='rcp85':
-   print("Calculating trend for RCP8.5")
-   for i in [1,2,3]:
-      # Precip
-      if varcode=='precip':
-         ncpath1 = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+".cam.h0.PRECC.201001-*.nc")[0]
-         ncpath2 = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+".cam.h0.PRECL.201001-*.nc")[0]
-         vartimeobj = vartimeproc.PrecipTimeProc(ncpath1, ncpath2, tim1=2020, tim2=2095, ppt1='PRECC', ppt2='PRECL')
-      # All other variables
-      else:
-         ncpath = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+".cam.h0."+varcode+".201001-*.nc")[0]
-         vartimeobj = vartimeproc.VarTimeProc(ncpath, tim1=2020, tim2=2095, varcode=varcode)
-      trend = vartimeobj.trend_lat_lon(season)
-      members.append(trend)
-# Feedback
-elif run=='feedback':
-   print("Calculating trend for Feedback")
-   for i in range(1,21):
-      # Precip
-      if varcode=='precip':
-         ncpath1 = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0.PRECC.202001-*.nc")[0]
-         ncpath2 = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0.PRECL.202001-*.nc")[0]
-         vartimeobj = vartimeproc.PrecipTimeProc(ncpath1, ncpath2, tim1=2020, tim2=2095, ppt1='PRECC', ppt2='PRECL')
-      # All other variables
-      else:
-         ncpath = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.feedback.0"+str(i).zfill(2)+".cam.h0."+varcode+".202001-*.nc")[0]
-         vartimeobj = vartimeproc.VarTimeProc(ncpath, tim1=2020, tim2=2095, varcode=varcode)
-      trend = vartimeobj.trend_lat_lon(season)
-      members.append(trend)
-
-print("...done")
-
-# Convert to hPa for PSL 
-if varcode=='PSL':
-   members = [x*0.01 for x in members]
-
 # Ensemble stats
+members = trend_defs.trend_lat_lon(run,season,varcode)
 nmembers = len(members)
 ensmean, ensstd= ensemble_functions.stats(members) 
 ttest = ensemble_functions.t_test_onesample(alpha, ensmean, ensstd, nmembers) 
