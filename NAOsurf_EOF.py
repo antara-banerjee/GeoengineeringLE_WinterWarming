@@ -26,7 +26,7 @@ import cartopy.crs as ccrs
 #*********************************************************************************
 # inputs
 varcode="PSL"
-save=False
+save=True
 
 outdir="/Users/abanerjee/scripts/glens/output/"
 npydir="/Users/abanerjee/scripts/glens/npy_output/"
@@ -80,7 +80,7 @@ def calc_EOF(filename):
 #*********************************************************************************
 # Concatenate Base data 
 npvars = []
-nBase = 5 
+nBase = 20
 for i in range(1,nBase+1):
    filename = glob.glob("/Volumes/CESM-GLENS/GLENS/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+"/atm/proc/tseries/month_1/Combined/b.e15.B5505C5WCCML45BGCR.f09_g16.control.0"+str(i).zfill(2)+".cam.h0."+varcode+".201001-*.nc")[0] 
    print('Base run ',i)
@@ -105,7 +105,8 @@ for i in range(nBase*len(nptime)):
 nyrs = int(npvarDS.shape[0]/12)
 npvarSEAS = np.empty([nyrs, npvarDS.shape[1], npvarDS.shape[2]])
 for i in range(nyrs):
-   j = 9+(12*i)
+   #j = 9+(12*i) # DJF
+   j = 3+(12*i) # JJA
    npvarSEAS[i,...] = npvarDS[j:j+3,...].mean(axis=0)
    
 # compute EOFs at each level
@@ -131,20 +132,23 @@ for ilevel in range(29):
 '''
 
 # Base leading principal component
-PCbase = np.empty([npvarDS.shape[0]])
-for itime in range(npvarDS.shape[0]):
-   PCbase[itime] = np.dot(npvarDS[itime,:,:].flatten(), eof1.flatten())
+#PCbase = np.empty([npvarDS.shape[0]])
+#for itime in range(npvarDS.shape[0]):
+#   PCbase[itime] = np.dot(npvarDS[itime,:,:].flatten(), eof1.flatten())
+
+# Base leading principal component
+PCbase = np.empty([npvarSEAS.shape[0]])
+for itime in range(npvarSEAS.shape[0]):
+   PCbase[itime] = np.dot(npvarSEAS[itime,:,:].flatten(), eof1.flatten())
 
 # save leading EOF, PC and climatology to file
 if save:
-   np.save(npydir+'NAO-SLP_EOF_allmonths', eof1)
-   np.save(npydir+'NAO-SLP_PCbase_allmonths', PCbase)
-   np.save(npydir+'NAO-SLP_clim_allmonths', clim)
+   np.save(npydir+'NAO-'+varcode+'_EOF_JJA', eof1)
+   np.save(npydir+'NAO-'+varcode+'_PCbase_JJA', PCbase)
+   np.save(npydir+'NAO-'+varcode+'_clim_JJA', clim)
 
 #*************************************************************************************
 # Plot the leading EOF expressed as regression map 
-
-# regression of EOF against standardized PC
 PCbase = PCbase/PCbase.std()
 eof1reg = np.empty([len(nplat), len(nplon)])
 for ilat in range(len(nplat)):
@@ -161,6 +165,7 @@ plt.colorbar(CS)
 ax.set_title('EOF1 regression map', fontsize=16)
 plt.savefig(outdir+'NAO_BaseEOF.png')
 plt.close()
+
 #*************************************************************************************
 # END #
 #*************************************************************************************
