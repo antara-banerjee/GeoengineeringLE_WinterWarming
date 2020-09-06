@@ -25,22 +25,21 @@ import custom_colors as ccol
 # inputs
 time_mean = 'JJA'
 varcode="PSL"
+save=True
+
 outdir="/Users/abanerjee/scripts/glens/output/"
 npydir="/Users/abanerjee/scripts/glens/npy_output/"
 
-#eof1 = np.load(npysavedir+'NAO-SLP_EOF_allmonths.npy')
-#PCbase = np.load(npysavedir+'NAO-SLP_PCbase_allmonths.npy')
-#clim = np.load(npysavedir+'NAO-SLP_clim_allmonths.npy')
+startmonth = {'DJF':9,'MAM':0,'JJA':3,'SON':6}
+istartmonth = startmonth[time_mean]
+
+#*************************************************************************************
+# load EOF, PC and control climatology
 eof1 = np.load(npydir+'NAO-'+varcode+'_EOF.npy')
 PCbase = np.load(npydir+'NAO-'+varcode+'_PCbase.npy')
 clim = np.load(npydir+'NAO-'+varcode+'_clim.npy')
 
-startmonth = {'DJF':9,'MAM':0,'JJA':3,'SON':6}
-#startmonth = {'DJF':11,'MAM':0,'JJA':3,'SON':6} # ***GEOHEAT - CHANGE!!
-istartmonth = startmonth[time_mean]
-
 #*************************************************************************************
-# GLENS Feedback file
 slopes = []
 def projection(filename):
    
@@ -76,25 +75,19 @@ def projection(filename):
    # latitude subset
    var = var.sel(lat=slice(20,80), lon=slice(-90,40))
 
-   # convert variable and dimensions to numpy arrays - try later with xarray (xr.apply_ufunc)
+   # convert variable and dimensions to numpy arrays 
    npvar = var.values
    global nptime; nptime = var['time'].values
    global nplat; nplat = var['lat'].values
    global nplon; nplon = var['lon'].values
 
-   # remove global mean
-   #global coslat; coslat = np.cos(np.deg2rad(nplat))
-   #global coslatarray; coslatarray = coslat[np.newaxis,:,np.newaxis]
-   #npvar = npvar - npvar*coslatarray/np.sum(coslatarray)
-
-   # deseasonalize
+   # remove control climatology 
    npvarDS = np.empty_like(npvar)
    for i in range(len(nptime)):
-      #j = i%12-2 # ***GEOHEAT
-      j = i%12 # ***GEOHEAT
+      j = i%12 
       npvarDS[i,...] = npvar[i,...] - clim[j,...]
 
-   ## seasonal mean
+   # seasonal mean
    npvarSEAS = np.empty([int(len(nptime)/12),len(nplat),len(nplon)])
    for i in range(int(len(nptime)/12)): 
       j = 12*i+istartmonth
@@ -163,22 +156,3 @@ plt.savefig('hist.png')
 plt.close()
 '''
 
-'''
-
-PC_mean = np.mean(np.array(PCfeedbacks), axis=0)
-#PC_mean = np.mean(np.array(PCrcp85s), axis=0)
-
-fig = plt.figure(figsize=(8,4))
-for i in range(len(PCfeedbacks)):
-   plt.plot(np.arange(2020,2095), PCfeedbacks[i])
-plt.plot(np.arange(2020,2095), PC_mean, color='k')
-plt.fill_between(x=np.arange(2020,2095), y1=0, y2=PC_mean, where=PC_mean>0, color='r', interpolate=True)
-plt.fill_between(x=np.arange(2020,2095), y1=0, y2=PC_mean, where=PC_mean<0, color='b', interpolate=True)
-plt.xlabel('Year')
-plt.ylabel('Standardized NAO index')
-plt.xlim([2020,2095])
-#plt.ylim([-0.6,0.6])
-plt.savefig(outdir+'NAO_PCfeedback.png')
-plt.close()
-#plt.savefig('NAO_'+time_mean+'_EOFBase.png')
-'''
