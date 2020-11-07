@@ -1,10 +1,19 @@
+'''
+Plot year of emergence of trend under geoengineering. 
+
+-Used for temperature in publication. 
+-Emergence defined as year when signal-to-noise ratio of trend exceeds 2.
+'''
+
+# standard imports
 import glob
-import vartimeproc 
-import ensemble_functions
-import plot_functions
 import numpy as np
 import xarray as xr
-import scipy.stats as ss
+
+# user imports
+import ensemble_functions
+import plot_functions
+import vartimeproc 
 
 #********************************************************************************************************
 season = 'DJF'
@@ -61,7 +70,7 @@ def plot_ToE():
                ToE[ilat,ilon] = npendyear[iendyear]+1
                break 
 
-   plot_functions.plot_ToE(ToE, nplat, nplon, '(d) Trend significance year', outdir+'ToE_TREFHT.png', 2020, 2095, 5,'year')
+   plot_functions.plot_ToE(ToE, nplat, nplon, '(b) Trend significance year', outdir+'ToE_TREFHT.png', 2020, 2095, 5,'year')
 
 #********************************************************************************************************
 # Comment in/out below to i) reate SNR netcdf (takes time) or ii) plot (quick)

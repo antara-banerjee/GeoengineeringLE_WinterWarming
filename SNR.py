@@ -1,9 +1,19 @@
+'''
+Signal-to-noise ratio testing in geoengineering runs.
+Signal is defined as ensemble mean end-of-century geoengineering response relative to Base.
+Noise is defined as interannual standard deviation of Base runs.
+The signal, noise and S/N ratio are all shown for near-surface air temperature in publication. 
+'''
+
+# standard imports
 import glob
-import ensemble_functions
-import plot_functions
-import clim_defs 
 import numpy as np
 import xarray as xr
+
+# user imports
+import clim_defs 
+import ensemble_functions
+import plot_functions
 import vartimeproc
 
 #********************************************************************************************************
@@ -49,7 +59,7 @@ plot_functions.plot_single_lat_lon(ensdiff, ensmean['lat'], ensmean['lon'], '(a)
 
 #********************************************************************************************************
 # 3) Signal-to-noise ratio 
-SNR = abs(ensdiff)/stdcontrol
-plot_functions.plot_ToE(SNR, ensmean['lat'], ensmean['lon'], '(c) SNR', outdir+'SNR.png', 0.2, 2.2, 0.2, '')
+SNR = abs(ensdiff)/ensstd_control
+plot_functions.plot_ToE(SNR, ensmean['lat'], ensmean['lon'], '(a) End-of-century\nSNR', outdir+'SNR.png', 0.2, 2.2, 0.2, '')
 
 #********************************************************************************************************

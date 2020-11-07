@@ -1,17 +1,25 @@
-import numpy as np
+'''
+Plot vertical profiles of trends in the North Atlantic Oscillation
+
+-uses pre-computed first Principal Component of zonal wind (NAO index)
+-set up for RCP8.5, Feedback and GEOHEAT_S simulations
+-ensemble mean timeseries with ensemble uncertainty is plotted
+'''
+
 import matplotlib.pyplot as plt
-import netCDF4 as ncdf
+import numpy as np
 import scipy.stats as ss
 
+#*********************************************************************************
 outdir = '/Users/abanerjee/scripts/glens/output/'
 npydir = '/Users/abanerjee/scripts/glens/npy_output/'
 nplevel = np.load(npydir+'nplevel.npy')
 
 #*********************************************************************************
 season = 'DJF'
-run='geoheats'
+run='feedback'
 mode='NAO'
-varcode='U'
+varcode='Z3'
 
 #*********************************************************************************
 # Feedback
@@ -57,12 +65,10 @@ if run=='geoheats':
    slopes = []
    N = 4
    title = '(b) GEOHEAT'
-   outname = 'vertical_NAO-U_GEOHEATS_DJF.png'
+   outname = 'vertical_'+mode+'-'+varcode+'_GEOHEATS_DJF.png'
    for i in range(1,N+1):
    
-      #NAO = np.load(npydir+'NAO-'+varcode+'_vertical_GeoHEATS_PCmember'+str(i)+'.npy') 
-      NAO = np.load(npydir+'NAO-'+varcode+'_PC_geoheats_'+str(i)+'_DJF.npy') 
-      #NAO = NAO.mean(axis=0) / 65.*30.
+      NAO = np.load(npydir+'NAO-'+varcode+'_PC_geoheats_'+str(i)+'_'+season+'.npy') 
       NAO = NAO[0,:] / 65.*30.
    
       slopes.append(NAO)

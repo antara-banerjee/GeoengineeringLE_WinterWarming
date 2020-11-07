@@ -1,19 +1,14 @@
-#*********************************************************************************    
-import cartopy.crs as ccrs                                                            
+'''
+Plot timeseries of the North Atlantic Oscillation
+
+-uses pre-computed first Principal Component of sea level pressure (NAO index)
+-set up for RCP8.5, Feedback and GEOHEAT_S simulations
+-ensemble mean timeseries with ensemble uncertainty is plotted
+'''
+
 import matplotlib.pyplot as plt                                                       
-import matplotlib.path as mpath                                                       
 import numpy as np                                                                    
-import xarray as xr                                                                   
-import glob                                                                           
-from cftime import DatetimeNoLeap                                                     
 import scipy.stats as ss                                                              
-from scipy import signal                                                              
-import sys                                                                            
-from eofs.standard import Eof                                                         
-                                                                                      
-# user modules                                                                        
-import ensemble_functions                                                             
-import custom_colors as ccol                                                          
 
 #*********************************************************************************    
 season = 'JJA'

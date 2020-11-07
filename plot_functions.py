@@ -3,14 +3,16 @@ Plotting functions.
 Includes latitude-height and latitude-longitude cross sections.
 '''
 
-#********************************************************************************************************
-import numpy as np
-import matplotlib.pyplot as plt
+# standard imports
+import cartopy.crs as ccrs
+from cartopy.util import add_cyclic_point
+import matplotlib as mpl
 import matplotlib.cm as cm
 import matplotlib.path as mpath
-import matplotlib as mpl
-from cartopy.util import add_cyclic_point
-import cartopy.crs as ccrs
+import matplotlib.pyplot as plt
+import numpy as np
+
+# user imports
 import custom_colors as ccol
 
 #********************************************************************************************************

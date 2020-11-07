@@ -1,5 +1,11 @@
+'''
+Setting up file paths to output from the RCP8.5, Feedback and GEOHEAT_S simulations.
+Calculates trends over chosen time period, season and variable after
+instantiating the VarTimeProc class.
+'''
+
+# user imports
 import glob
-import xarray as xr
 import vartimeproc 
 import ensemble_functions
 
@@ -10,7 +16,7 @@ def trend_lat_lon(run, season, varcode):
 
    # RCP8.5
    if run=='rcp85':
-      print("Calculating climatology for RCP8.5")
+      print("Calculating trend for RCP8.5")
       for i in [1,2,3]:
          # Precip
          if varcode=='precip':
@@ -26,7 +32,7 @@ def trend_lat_lon(run, season, varcode):
    
    # Feedback
    elif run=='feedback':
-      print("Calculating climatology for Feedback")
+      print("Calculating trend for Feedback")
       for i in range(1,21):
          # Precip
          if varcode=='precip':
@@ -42,7 +48,7 @@ def trend_lat_lon(run, season, varcode):
    
    # GEOHEAT_S
    elif run=='geoheats':
-      print("Calculating climatology for GEOHEAT_S")
+      print("Calculating trend for GEOHEAT_S")
       for i in range(1,5):
          yrvals = []
          for yr in range(2011,2031):

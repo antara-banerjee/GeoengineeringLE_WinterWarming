@@ -1,9 +1,13 @@
-import glob
-import xarray as xr
-import vartimeproc 
+'''
+Trend figure presets for zonal mean zonal wind in publication.
+Used for the GEOHEAT run where the trend is inferred from the climatological difference to Base.
+Plotting both ensemble mean and individual ensemble members.
+'''
+
+# user imports
+import clim_defs
 import ensemble_functions
 import plot_functions
-import clim_defs
 
 #********************************************************************************************************
 run = 'geoheats'
@@ -35,7 +39,7 @@ ensmean_control, ensstd_control = ensemble_functions.stats(members_control)
 # Perturbation climatology 
 members = clim_defs.clim_lat_hgt(run,season,varcode)
 nmembers = len(members)
-ensmean, ensstd= ensemble_functions.stats(members) 
+ensmean, ensstd = ensemble_functions.stats(members) 
 
 # Difference to Base
 ensdiff = ensmean - ensmean_control

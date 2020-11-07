@@ -1,10 +1,15 @@
+'''
+This module contains functions to compute ensemble statistics 
+
+Contains:
+	stats (ensemble mean and standard deviation)
+ 	t_test_twosample (2-tailed, 2-sample t-test)
+	t_test_onesample (2-tailed, 1-sample t-test)
+'''
+
 import numpy as np
 import scipy.stats as ss
 import xarray as xr
-
-#********************************************************************************************************
-# This module contains functions to compute ensemble statistics 
-#********************************************************************************************************
 
 #********************************************************************************************************
 # Ensemble mean and standard deviation

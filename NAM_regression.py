@@ -1,10 +1,17 @@
+'''
+Plot trends in variables that are congruent with the Northern Annular Mode at 50hPa (NAM50)
+and the residual trends that cannot be explained by NAM50.
+'''
+
+# standard imports
 import glob 
-import vartimeproc 
-import ensemble_functions
-import plot_functions
-import xarray as xr
 import numpy as np
 import scipy.stats as ss
+
+# user imports
+import ensemble_functions
+import plot_functions
+import vartimeproc 
 
 #********************************************************************************************************
 season = 'DJF'
@@ -103,3 +110,6 @@ plot_functions.plot_single_lat_lon(ensmean_resid, tseries_surf['lat'], tseries_s
 				   contours[varcode][0], contours[varcode][1],\
 				   clabel[varcode], colorscale=colorscale[varcode])
 
+#********************************************************************************************************
+# END #
+#********************************************************************************************************

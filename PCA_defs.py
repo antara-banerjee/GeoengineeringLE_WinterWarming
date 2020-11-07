@@ -1,29 +1,23 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+'''
+Common definitions for EOF and PC extraction. 
+Set up for NAM and NAO modes. 
+Set up for seasonal means (DJF, MAM, JJA, SON).
+'''
 
-#*************************************************************************************
-# NAO(SLP) EOF #
-#*********************************************************************************
-"""
-Calculate NAO index as EOF of sea level pressure.
-
-@author: A Banerjee
-"""
-
-#*********************************************************************************
-import numpy as np
-import xarray as xr
-import glob
+# standard imports
+import cartopy.crs as ccrs
 from cftime import DatetimeNoLeap
-from eofs.standard import Eof
+import matplotlib.pyplot as plt
+import numpy as np
 from numpy import linalg as LA
 import scipy.stats as ss
+import xarray as xr
 
-# temporary
-import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
+# third-party imports
+from eofs.standard import Eof
 
 #*********************************************************************************
+# Pre-process file: extract variable, adjust time and longitude values
 def preprocess(filename, varcode, tim1, tim2, vertical=False):
 
    # extract variable  
@@ -69,21 +63,24 @@ def preprocess(filename, varcode, tim1, tim2, vertical=False):
    # for cos latitude weighting later
    coslat = np.cos(np.deg2rad(nplat))
 
-   #print(nplat)
-   #print('\n')
-   #print(nplon)
-   #print('\n')
-   #print(coslat)
-
    return (npvar, nptime, nplev, nplat, nplon, coslat) if vertical else (npvar, nptime, nplat, nplon, coslat)
 
 #*********************************************************************************
+# Remove global mean 
+def remove_gm(var, lats, coslat):
+
+   coslatarray = coslat[np.newaxis,:,np.newaxis]
+   gm = np.nansum(var*coslatarray, axis=1)/np.sum(coslatarray)
+   vargm = var - gm[:,np.newaxis,:]
+
+   return vargm 
+
+#*********************************************************************************
+# Remove given monthly climatology and take seasonal mean
 def calc_anom(var, monclim, season):
 
    startmonth = {'DJF':9,'MAM':0,'JJA':3,'SON':6}
    istartmonth = startmonth[season]
-   print(var.shape)
-   print(monclim.shape)
 
    # remove monthly climatology
    varDS = np.empty_like(var)
@@ -102,6 +99,7 @@ def calc_anom(var, monclim, season):
    return varSEAS
    
 #*********************************************************************************
+# subset over NAM/NAO region
 def area_subset(var, mode, lats, lons, coslat):
 
    if mode=='NAM':
@@ -129,17 +127,11 @@ def area_subset(var, mode, lats, lons, coslat):
    lonsub = lons[illon:iulon]
    coslatsub = coslat[illat:iulat]
 
-   #print(latsub)
-   #print('\n')
-   #print(lonsub)
-   #print('\n')
-   #print(coslatsub)
-   #print(varsub[:,0,0])
-
    return (varsub, latsub, lonsub, coslatsub)
 
 #*********************************************************************************
-def calc_EOF2D(anom, nplat, coslat):
+# compute 2D (lat-lon) EOF with weighting and associated PC
+def calc_EOF2D(anom, nplat, coslat, varcode):
 
    # apply sqrt cos latitude weighting
    wgts = np.sqrt(coslat)
@@ -148,10 +140,16 @@ def calc_EOF2D(anom, nplat, coslat):
    # leading EOF
    solver =  Eof(anom, weights=wgts)
    eof1 = solver.eofs(neofs=1, eofscaling=0)[0]
-   #if eof1[np.where(nplat>=68)[0][0],0] > 0: # PSL 
-   #if eof1[np.where(nplat>=80)[0][0],0] > 0: # Z3
-   if eof1[np.where(nplat>=60)[0][0],0] < 0: # U
-      eof1 = -eof1
+   if varcode=='PSL':
+      if eof1[np.where(nplat>=68)[0][0],0] > 0: # PSL 
+         eof1 = -eof1
+   elif varcode=='Z3':
+      #if eof1[np.where(nplat>=80)[0][0],0] > 0: # Z3
+      if eof1[np.where(nplat>=75)[0][0],0] > 0: # Z3
+         eof1 = -eof1
+   elif varcode=='U':
+      if eof1[np.where(nplat>=60)[0][0],0] < 0: # U
+         eof1 = -eof1
    
    # leading principal component
    PC1 = np.empty([anom.shape[0]])
@@ -161,6 +159,7 @@ def calc_EOF2D(anom, nplat, coslat):
    return (eof1, PC1)
 
 #*********************************************************************************
+# projection of anomaly timeseries onto given EOF; standardized by Base PC
 def projection(anom, eof, PCbase):
    
    # projection onto EOF
@@ -171,8 +170,8 @@ def projection(anom, eof, PCbase):
    return PC
 
 #*************************************************************************************
+# plot EOF as regression map
 def plot_EOF(anom, PC, lats, lons):
-
 
    outdir="/Users/abanerjee/scripts/glens/output/"
 

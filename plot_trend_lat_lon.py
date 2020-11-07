@@ -1,15 +1,19 @@
-import glob
-import xarray as xr
-import vartimeproc 
+'''
+Trend figure presets for sea level pressure, temperature and precipitation in publication.
+Used for the RCP8.5 and geoengineering (Feedback) simulations.
+Plotting both ensemble mean and individual ensemble members.
+'''
+
+# user imports
 import ensemble_functions
 import plot_functions
 import trend_defs
 
 #********************************************************************************************************
-run = 'rcp85'
+run = 'feedback'
 season = 'DJF'
 outdir="/Users/abanerjee/scripts/glens/output/"
-varcode = 'precip'
+varcode = 'TREFHT'
 alpha = 0.05
 
 #********************************************************************************************************
@@ -42,7 +46,6 @@ clabel    = {'TREFHT'  :'$^{\circ}$C per 30 yrs',\
              'PSL'     :'hPa per 30 yrs'}
 
 #********************************************************************************************************
-# Calculate trend for each member 
 # Ensemble stats
 members = trend_defs.trend_lat_lon(run,season,varcode)
 nmembers = len(members)
@@ -53,33 +56,21 @@ ttest = ensemble_functions.t_test_onesample(alpha, ensmean, ensstd, nmembers)
 plot_functions.plot_single_lat_lon(ensmean, ensmean['lat'], ensmean['lon'],\
                                    plotlett[varcode][run][season]+' '+runname[run]+'\n'+longtitle[varcode]+'\n'+season,\
                                    outdir+varcode+'_trend_'+run+'_'+season+'.png',\
-                                   shading[varcode][run][0], shading[varcode][run][1], contours[varcode][run][0], contours[varcode][run][1],\
+                                   shading[varcode][run][0], shading[varcode][run][1],\
+                                   contours[varcode][run][0], contours[varcode][run][1],\
                                    clabel[varcode],\
                                    zsig=ttest,\
                                    colorscale=colorscale[varcode])
 
 # Plot members 
-'''
 plot_functions.plot_matrix_lat_lon(members, ensmean['lat'], ensmean['lon'],\
                                    '',\
                                    outdir+varcode+'_trend_'+run+'_members_'+season+'.png',\
-                                   shading[run][varcode][0], shading[run][varcode][1], contours[run][varcode][0], contours[run][varcode][1],\
-                                   clabel[varcode])
-'''
+                                   shading[varcode][run][0], shading[varcode][run][1],\
+				   contours[varcode][run][0], contours[varcode][run][1],\
+                                   clabel[varcode],\
+                                   colorscale=colorscale[varcode])
 
 #********************************************************************************************************
 # END
-#********************************************************************************************************
-
-'''
-t = xr.open_dataset('xrToE_Ts_trend_2stdev.nc')
-#t = t.where(ttest_feedback==0)
-plot_functions.plot_ToE(t.__xarray_dataarray_variable__,'ToE','ToE_Ts_trend_2stdev.png',2020,2095,5,'year')
-
-t = xr.open_dataset('xrToE_Ts_clim_2stdev_stdcontrol.nc')
-print(t.__xarray_dataarray_variable__[0,:])
-plot_functions.plot_ToE(t.__xarray_dataarray_variable__,'ToE','ToE_2stdev_stdcontrol.png',2020,2095,5,'year')
-#plot_functions.plot_ToE(t.__xarray_dataarray_variable__[:,:,-1],'ToE','ToE_2stdev_stdcontrol.png',0,1,0.1,'year')
-'''
-
 #********************************************************************************************************
