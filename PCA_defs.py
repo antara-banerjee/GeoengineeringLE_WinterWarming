@@ -70,8 +70,8 @@ def preprocess(filename, varcode, tim1, tim2, vertical=False):
 def remove_gm(var, lats, coslat):
 
    coslatarray = coslat[np.newaxis,:,np.newaxis]
-   gm = np.nansum(var*coslatarray, axis=1)/np.sum(coslatarray)
-   vargm = var - gm[:,np.newaxis,:]
+   gm = np.nansum(var*coslatarray, axis=(1,2))/(np.sum(coslatarray)*var.shape[2])
+   vargm = var - gm[:,np.newaxis,np.newaxis]
 
    return vargm 
 
