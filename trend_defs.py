@@ -115,16 +115,3 @@ print("...done")
 #********************************************************************************************************
 # END
 #********************************************************************************************************
-
-'''
-t = xr.open_dataset('xrToE_Ts_trend_2stdev.nc')
-#t = t.where(ttest_feedback==0)
-plot_functions.plot_ToE(t.__xarray_dataarray_variable__,'ToE','ToE_Ts_trend_2stdev.png',2020,2095,5,'year')
-
-t = xr.open_dataset('xrToE_Ts_clim_2stdev_stdcontrol.nc')
-print(t.__xarray_dataarray_variable__[0,:])
-plot_functions.plot_ToE(t.__xarray_dataarray_variable__,'ToE','ToE_2stdev_stdcontrol.png',2020,2095,5,'year')
-#plot_functions.plot_ToE(t.__xarray_dataarray_variable__[:,:,-1],'ToE','ToE_2stdev_stdcontrol.png',0,1,0.1,'year')
-'''
-
-#********************************************************************************************************
