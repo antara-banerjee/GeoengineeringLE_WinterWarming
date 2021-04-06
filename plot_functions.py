@@ -31,11 +31,58 @@ def plot_single_lat_hgt(z, zbase, title, outname, lim, by, cbarlim, cbarby, clim
    top = 1
    xlab = 'Latitude'
    ylab = 'Pressure (hPa)'
+   #ylab = ''
    cols = ccol.custom_colors('BlueRed')
 
    # main plot
    fig.add_axes([0.12, 0.15, 0.65, 0.75]) # left, bottom, width, height
    cplot=plt.contourf(z.lat, -np.log10(z.level), z, levs, extend="both", cmap=cols)
+   cplot2=plt.contour(zbase.lat, -np.log10(zbase.level), zbase, clevs, colors='black', hold='on', linewidths=0.5)
+   plt.clabel(cplot2, fontsize=6, fmt='%.'+str(cdp)+'f') 
+   plt.title(title, fontsize=12)
+   plt.xlabel(xlab,fontsize=10)
+   plt.ylabel(ylab,fontsize=10, labelpad=-5)
+   plt.xticks(np.arange(-90,120,30), [r'90$^{\circ}$S',r'60$^{\circ}$S',r'30$^{\circ}$S',r'0$^{\circ}$',r'30$^{\circ}$N',r'60$^{\circ}$N',r'90$^{\circ}$N'])
+   yticks = [1000,100,10,1,0.1]
+   plt.yticks(-np.log10(yticks),yticks)
+   plt.ylim((-np.log10(bottom),-np.log10(top)))
+   plt.tick_params(axis='both', which='major', labelsize=10)
+
+   # shade OUT non-significance 
+   if type(zsig) is int: # default, no significance shown
+      zsig = np.zeros([len(zlat),len(zlon)])
+   mpl.rcParams['hatch.linewidth'] = 0.1
+   plt.contourf(z.lat, -np.log10(z.level), zsig, levels=[-1,0,1], hatches=[None,'...'], colors='none')
+
+   # colorbar
+   if colorbar:
+      cbar_ax = fig.add_axes([0.83, 0.15, 0.04, 0.75])
+      cbar=plt.colorbar(cplot, cax=cbar_ax, orientation='vertical', ticks=cbarticks)
+      cbar.set_label(clabel,size=10)
+      cbar.ax.tick_params(labelsize=10)
+
+   plt.savefig(outname)
+   plt.close()
+
+#********************************************************************************************************
+# One plot, latitude-height cross section
+def plot_single_lat_hgt_onesided(z, zbase, title, outname, lim, by, cbarlim, cbarby, clim, cby, cdp, clabel, zsig=0, colorbar=True):
+
+   fig = plt.figure(figsize=(4.5, 3.5), dpi=300)
+
+   # some plot parameters
+   levs = np.arange(0,lim+by,by)
+   clevs = np.arange(0,clim+cby,cby)
+   cbarticks = np.arange(0,cbarlim+cbarby,cbarby)
+   bottom = 1000
+   top = 1
+   xlab = 'Latitude'
+   ylab = 'Pressure (hPa)'
+   #cols = ccol.custom_colors('BlueRed')
+
+   # main plot
+   fig.add_axes([0.12, 0.15, 0.65, 0.75]) # left, bottom, width, height
+   cplot=plt.contourf(z.lat, -np.log10(z.level), z, levs, extend="both", cmap=cm.afmhot)
    cplot2=plt.contour(zbase.lat, -np.log10(zbase.level), zbase, clevs, colors='black', hold='on', linewidths=0.5)
    plt.clabel(cplot2, fontsize=6, fmt='%.'+str(cdp)+'f') 
    plt.title(title, fontsize=12)

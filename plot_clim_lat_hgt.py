@@ -4,6 +4,10 @@ Used for the GEOHEAT run where the trend is inferred from the climatological dif
 Plotting both ensemble mean and individual ensemble members.
 '''
 
+# standard imports
+import numpy as np
+import xarray as xr
+
 # user imports
 import clim_defs
 import ensemble_functions
@@ -13,7 +17,7 @@ import plot_functions
 run = 'geoheats'
 season = 'DJF'
 outdir="/Users/abanerjee/scripts/glens/output/"
-varcode = 'U'
+varcode = 'T'
 alpha = 0.05
 
 #********************************************************************************************************
@@ -22,13 +26,24 @@ runname   = {'rcp85'   : 'RCP8.5',\
              'feedback': 'GEO8.5',\
              'geoheats': 'GEOHEAT'}
 
-plotlett  = {'U'       :{'rcp85':{'DJF':'(c)'},'feedback':{'DJF':'(a)'},'geoheats':{'DJF':'(b)'}}}
+plotlett  = {'U'       :{'rcp85':{'DJF':'(c)','JJA':'(c)','SON':'(c)'},'feedback':{'DJF':'(a)','JJA':'(c)','SON':'(c)'},'geoheats':{'DJF':'(e)','JJA':'(c)','SON':'(c)'}}}
 
-shading   = {'U'       :{'rcp85':(5,0.5), 'feedback':(5,0.5), 'geoheats':(5,0.5)}}
+shading   = {'U'       :{'rcp85':(5,0.5), 'feedback':(5,0.5), 'geoheats':(5,0.5)},\
+             'T'       :{'rcp85':(5,0.5), 'feedback':(5,0.5), 'geoheats':(5,0.5)}}
 
-contours  = {'U'       :{'rcp85':(60,10), 'feedback':(60,10), 'geoheats':(60,10)}}
+cbar      = {'U'       :{'rcp85':(5,1), 'feedback':(5,1), 'geoheats':(5,1)}}
 
-clabel    = {'U'       :'Zonal mean zonal wind (ms$^{-1}$ per 30 yrs)'}
+contours  = {'U'       :{'rcp85':(60,10), 'feedback':(60,10), 'geoheats':(60,10)},\
+             'T'       :{'rcp85':(300,10), 'feedback':(300,10), 'geoheats':(300,10)}}
+
+cdp       = {'U'       :{'rcp85':0, 'feedback':0, 'geoheats':0}}
+
+clabel    = {'U'       :'Zonal mean zonal wind (ms$^{-1}$ per 30 yrs)',\
+             'T'       :'Temperature ($^{\circ}$C per 30 yrs)'}
+
+plotlett['T'] = plotlett['U']
+cbar['T'] = cbar['U']
+cdp['T'] = cdp['U']
 
 #********************************************************************************************************
 # Control climatology
@@ -48,16 +63,24 @@ ttest = ensemble_functions.t_test_twosample(alpha, ensdiff, ensstd_control, enss
 # Convert to trend
 ensdiff = ensdiff/65.*30.
 
+areawgt = np.cos(np.deg2rad(ensmean.lat))
+T50trop = (ensdiff.sel(lat=slice(-30,30),level=50)*areawgt.sel(lat=slice(-30,30))).sum() / areawgt.sel(lat=slice(-30,30)).sum()
+T50pole = (ensdiff.sel(lat=slice(60,90),level=50)*areawgt.sel(lat=slice(60,90))).sum() / areawgt.sel(lat=slice(60,90)).sum()
+print(T50trop - T50pole)
+
 # Plot ensemble mean
 plot_functions.plot_single_lat_hgt(ensdiff, ensmean_control,\
                                    plotlett[varcode][run][season]+' '+runname[run],\
                                    outdir+varcode+'_clim_'+run+'_'+season+'.png',\
-                                   shading[varcode][run][0], shading[varcode][run][1], contours[varcode][run][0], contours[varcode][run][1],\
+                                   shading[varcode][run][0], shading[varcode][run][1],\
+				   cbar[varcode][run][0], cbar[varcode][run][1],\
+ 				   contours[varcode][run][0], contours[varcode][run][1],\
+			           cdp[varcode][run],\
                                    clabel[varcode],\
                                    zsig=ttest)
 
-# Plot members 
 '''
+# Plot members 
 plot_functions.plot_matrix_lat_hgt(members, ensmean_control,\
                                    '',\
                                    outdir+varcode+'_trend_'+run+'_members_'+season+'.png',\
@@ -65,19 +88,17 @@ plot_functions.plot_matrix_lat_hgt(members, ensmean_control,\
                                    clabel[varcode])
 '''
 
+'''
+# testing for T
+# Plot ensemble mean
+plot_functions.plot_single_lat_hgt_onesided(ensmean_control, ensmean_control,\
+                                   'T',\
+                                   #outdir+varcode+'_clim_'+run+'_'+season+'.png',\
+                                   outdir+varcode+'_clim_control_'+season+'.png',\
+                                   300, 10, 300, 10, 300, 10, 1,\
+                                   'T',\
+                                   zsig=ttest)
+'''
 #********************************************************************************************************
 # END
-#********************************************************************************************************
-
-'''
-t = xr.open_dataset('xrToE_Ts_trend_2stdev.nc')
-#t = t.where(ttest_feedback==0)
-plot_functions.plot_ToE(t.__xarray_dataarray_variable__,'ToE','ToE_Ts_trend_2stdev.png',2020,2095,5,'year')
-
-t = xr.open_dataset('xrToE_Ts_clim_2stdev_stdcontrol.nc')
-print(t.__xarray_dataarray_variable__[0,:])
-plot_functions.plot_ToE(t.__xarray_dataarray_variable__,'ToE','ToE_2stdev_stdcontrol.png',2020,2095,5,'year')
-#plot_functions.plot_ToE(t.__xarray_dataarray_variable__[:,:,-1],'ToE','ToE_2stdev_stdcontrol.png',0,1,0.1,'year')
-'''
-
 #********************************************************************************************************
