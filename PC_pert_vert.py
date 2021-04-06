@@ -15,11 +15,11 @@ import PCA_defs
 
 #*********************************************************************************
 # inputs
-run = 'geoheats'
+run = 'feedback'
 season = 'DJF'
 varcode = 'Z3'
-mode = 'NAO'
-save = 'True'
+mode = 'NAM'
+save = True
 
 outdir="/Users/abanerjee/scripts/glens/output/"
 npydir="/Users/abanerjee/scripts/glens/npy_output/"
@@ -68,7 +68,8 @@ if run=='feedback':
          PCPert[:,ilev] = PC
    
       # save projection
-      np.save(npydir+mode+'-'+varcode+'_PC_feedback_'+str(i)+'_'+season+'.npy', PCPert) 
+      if save==True:
+         np.save(npydir+mode+'-'+varcode+'_PC_feedback_'+str(i)+'_'+season, PCPert) 
 
 elif run=='rcp85':
    for i in range(1, 4):
@@ -107,7 +108,8 @@ elif run=='rcp85':
          PCPert[:,ilev] = PC
    
       # save projection
-      np.save(npydir+mode+'-'+varcode+'_PC_rcp85_'+str(i)+'_'+season+'.npy', PCPert) 
+      if save==True:
+         np.save(npydir+mode+'-'+varcode+'_PC_rcp85_'+str(i)+'_'+season+'.npy', PCPert) 
 
 elif run=='geoheats':
 
@@ -154,7 +156,9 @@ elif run=='geoheats':
    
       # save projection (one for each member)
       member_mean = np.array(PCgeoheats).mean(axis=0) 
-      np.save(npydir+mode+'-'+varcode+'_PC_geoheats_'+str(i)+'_'+season+'.npy', member_mean) 
+      
+      if save==True:
+         np.save(npydir+mode+'-'+varcode+'_PC_geoheats_'+str(i)+'_'+season, member_mean) 
 
 #*************************************************************************************
 # END #
