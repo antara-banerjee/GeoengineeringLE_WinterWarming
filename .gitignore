@@ -1,2 +1,3 @@
-output/*
+npy_output/
+output/
 *.pyc
