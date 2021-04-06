@@ -74,7 +74,7 @@ for i in range(1,21):
    trend_NAM = ss.linregress(range(nyrs), tseries_NAM)[0] * 30
 
    # congruent trend
-   regress = lambda x: ss.linregress(tseries_NAM, x)[0] * trend_NAM
+   regress = lambda y: ss.linregress(tseries_NAM, y)[0] * trend_NAM
    tseries_surf_flat = tseries_surf.values.reshape([tseries_surf.shape[0], tseries_surf.shape[1]*tseries_surf.shape[2]])
    congr = np.apply_along_axis(regress, 0, tseries_surf_flat).reshape([tseries_surf.shape[1],tseries_surf.shape[2]])
    resid = trend_surf.values - congr 
@@ -92,6 +92,12 @@ ensmean_resid = np.array(members_resid).mean(axis=0)
 print('ensemble mean congr shape: ',ensmean_congr.shape)
 print('ensemble mean resid shape: ',ensmean_resid.shape)
 
+ensstd_congr = np.array(members_congr).std(axis=0)
+ensstd_resid = np.array(members_resid).std(axis=0)
+
+ttest_congr = ensemble_functions.t_test_onesample(alpha, ensmean_congr, ensstd_congr, len(members_congr))
+ttest_resid = ensemble_functions.t_test_onesample(alpha, ensmean_resid, ensstd_resid, len(members_resid))
+
 #********************************************************************************************************
 # Plot
 # congruent
@@ -100,7 +106,9 @@ plot_functions.plot_single_lat_lon(ensmean_congr, tseries_surf['lat'], tseries_s
 				   outdir+varcode+'_congr_feedback_'+season+'.png',\
 				   shading[varcode][0], shading[varcode][1],\
 				   contours[varcode][0], contours[varcode][1],\
-				   clabel[varcode], colorscale=colorscale[varcode])
+				   clabel[varcode],\
+				   ttest_congr,\
+				   colorscale=colorscale[varcode])
 
 # residual
 plot_functions.plot_single_lat_lon(ensmean_resid, tseries_surf['lat'], tseries_surf['lon'],\
@@ -108,7 +116,9 @@ plot_functions.plot_single_lat_lon(ensmean_resid, tseries_surf['lat'], tseries_s
 				   outdir+varcode+'_resid_feedback_'+season+'.png',\
 				   shading[varcode][0], shading[varcode][1],\
 				   contours[varcode][0], contours[varcode][1],\
-				   clabel[varcode], colorscale=colorscale[varcode])
+				   clabel[varcode],\
+				   ttest_resid,\
+				   colorscale=colorscale[varcode])
 
 #********************************************************************************************************
 # END #
