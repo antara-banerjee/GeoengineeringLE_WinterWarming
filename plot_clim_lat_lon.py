@@ -6,8 +6,8 @@ Plotting both ensemble mean and individual ensemble members.
 
 # user imports
 import clim_defs 
-import ensemble_functions
-import plot_functions
+import ensemble_defs
+import plot_defs
 
 #********************************************************************************************************
 run = 'geoheats'
@@ -50,22 +50,22 @@ clabel    = {'TREFHT'  :'$^{\circ}$C per 30 yrs',\
 # Base climatology
 members_base = clim_defs.clim_lat_lon('control',season,varcode)
 nmembers_base = len(members_base)
-ensmean_base, ensstd_base = ensemble_functions.stats(members_base)
+ensmean_base, ensstd_base = ensemble_defs.stats(members_base)
 
 # Perturbation climatology 
 members = clim_defs.clim_lat_lon(run,season,varcode)
 nmembers = len(members)
-ensmean, ensstd = ensemble_functions.stats(members) 
+ensmean, ensstd = ensemble_defs.stats(members) 
 
 # Difference to Base
 ensdiff = ensmean - ensmean_base
-ttest = ensemble_functions.t_test_twosample(alpha, ensdiff, ensstd_base, ensstd, nmembers_base, nmembers) 
+ttest = ensemble_defs.t_test_twosample(alpha, ensdiff, ensstd_base, ensstd, nmembers_base, nmembers) 
 
 # Convert to trend
 ensdiff = ensdiff/65.*30.
 
 # Plot ensemble mean
-plot_functions.plot_single_lat_lon(ensdiff, ensdiff['lat'], ensdiff['lon'],\
+plot_defs.plot_single_lat_lon(ensdiff, ensdiff['lat'], ensdiff['lon'],\
                                    plotlett[varcode][run][season]+' '+runname[run]+'\n'+longtitle[varcode],\
                                    outdir+varcode+'_clim_'+run+'_'+season+'.png',\
                                    shading[varcode][run][0], shading[varcode][run][1], contours[varcode][run][0], contours[varcode][run][1],\
@@ -75,7 +75,7 @@ plot_functions.plot_single_lat_lon(ensdiff, ensdiff['lat'], ensdiff['lon'],\
 
 # Plot members 
 '''
-plot_functions.plot_matrix_lat_lon(members, ensmean['lat'], ensmean['lon'],\
+plot_defs.plot_matrix_lat_lon(members, ensmean['lat'], ensmean['lon'],\
                                    '',\
                                    outdir+varcode+'_trend_'+run+'_members_'+season+'.png',\
                                    shading[run][varcode][0], shading[run][varcode][1], contours[run][varcode][0], contours[run][varcode][1],\

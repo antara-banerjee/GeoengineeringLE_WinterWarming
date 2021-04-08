@@ -11,8 +11,8 @@ import numpy as np
 import xarray as xr
 
 # user imports
-import ensemble_functions
-import plot_functions
+import ensemble_defs
+import plot_defs
 import vartimeproc 
 
 #********************************************************************************************************
@@ -34,7 +34,7 @@ def calc_SNR():
            vartimeobj = vartimeproc.VarTimeProc(ncpath, tim1=2020, tim2=endyear, varcode=varcode)
            trend = vartimeobj.trend_lat_lon(season)
            members.append(trend)
-       ensmean, ensstd = ensemble_functions.stats(members) 
+       ensmean, ensstd = ensemble_defs.stats(members) 
        SNR = abs(ensmean) / (ensstd / np.sqrt(N-1))
        SNRs.append(SNR)
    
@@ -70,7 +70,7 @@ def plot_ToE():
                ToE[ilat,ilon] = npendyear[iendyear]+1
                break 
 
-   plot_functions.plot_ToE(ToE, nplat, nplon, '(b) Trend significance year', outdir+'ToE_TREFHT.png', 2020, 2095, 5,'year')
+   plot_defs.plot_ToE(ToE, nplat, nplon, '(b) Trend significance year', outdir+'ToE_TREFHT.png', 2020, 2095, 5,'year')
 
 #********************************************************************************************************
 # Comment in/out below to i) reate SNR netcdf (takes time) or ii) plot (quick)

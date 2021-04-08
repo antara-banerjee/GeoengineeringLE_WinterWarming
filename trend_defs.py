@@ -7,7 +7,7 @@ instantiating the VarTimeProc class.
 # user imports
 import glob
 import vartimeproc 
-import ensemble_functions
+import ensemble_defs
 
 #********************************************************************************************************
 def trend_lat_lon(run, season, varcode):
@@ -63,7 +63,7 @@ def trend_lat_lon(run, season, varcode):
                vartimeobj = vartimeproc.VarTimeProc(ncpath, tim1=yr, tim2=yr+1, varcode=varcode)
             trend = vartimeobj.trend_lat_lon(season)
             yrvals.append(trend)
-         yrvals_mean, yrvals_std = ensemble_functions.stats(yrvals)
+         yrvals_mean, yrvals_std = ensemble_defs.stats(yrvals)
          members.append(yrvals_mean)
 
    # Convert to hPa for PSL 
@@ -105,7 +105,7 @@ def trend_lat_hgt(run, season, varcode):
             vartimeobj = vartimeproc.VarTimeProc(ncpath, tim1=yr, tim2=yr+1, varcode=varcode, zm=True)
             trend = vartimeobj.trend_lat_hgt(season)
             yrvals.append(trend)
-         yrvals_mean, yrvals_std = ensemble_functions.stats(yrvals)
+         yrvals_mean, yrvals_std = ensemble_defs.stats(yrvals)
          members.append(yrvals_mean)
 
    return members

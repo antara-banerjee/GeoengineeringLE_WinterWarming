@@ -9,9 +9,9 @@ leading to the surface climate responses is quantified using a combination of EO
 ## Key modules
 vartimeproc: classes for extraction and time processing of variables from netcdf files
 
-clim_defs: functions to calculate climatologies in GLENS
+ensemble_defs: functions to calculate ensemble statistics (mean, standard deviation, t-statistics)
 
-ensemble_functions: functions to calculate ensemble statistics (mean, standard deviation, t-statistics)
+clim_defs: functions to calculate climatologies in GLENS
 
 trend_defs: functions to calculate trends in GLENS
 

@@ -5,8 +5,8 @@ Plotting both ensemble mean and individual ensemble members.
 '''
 
 # user imports
-import ensemble_functions
-import plot_functions
+import ensemble_defs
+import plot_defs
 import trend_defs
 
 #********************************************************************************************************
@@ -49,11 +49,11 @@ clabel    = {'TREFHT'  :'$^{\circ}$C per 30 yrs',\
 # Ensemble stats
 members = trend_defs.trend_lat_lon(run,season,varcode)
 nmembers = len(members)
-ensmean, ensstd= ensemble_functions.stats(members) 
-ttest = ensemble_functions.t_test_onesample(alpha, ensmean, ensstd, nmembers) 
+ensmean, ensstd= ensemble_defs.stats(members) 
+ttest = ensemble_defs.t_test_onesample(alpha, ensmean, ensstd, nmembers) 
 
 # Plot ensemble mean
-plot_functions.plot_single_lat_lon(ensmean, ensmean['lat'], ensmean['lon'],\
+plot_defs.plot_single_lat_lon(ensmean, ensmean['lat'], ensmean['lon'],\
                                    plotlett[varcode][run][season]+' '+runname[run]+'\n'+longtitle[varcode]+'\n'+season,\
                                    outdir+varcode+'_trend_'+run+'_'+season+'.png',\
                                    shading[varcode][run][0], shading[varcode][run][1],\
@@ -63,7 +63,7 @@ plot_functions.plot_single_lat_lon(ensmean, ensmean['lat'], ensmean['lon'],\
                                    colorscale=colorscale[varcode])
 
 # Plot members 
-plot_functions.plot_matrix_lat_lon(members, ensmean['lat'], ensmean['lon'],\
+plot_defs.plot_matrix_lat_lon(members, ensmean['lat'], ensmean['lon'],\
                                    '',\
                                    outdir+varcode+'_trend_'+run+'_members_'+season+'.png',\
                                    shading[varcode][run][0], shading[varcode][run][1],\

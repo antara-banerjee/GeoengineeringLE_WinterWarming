@@ -10,8 +10,8 @@ import xarray as xr
 
 # user imports
 import clim_defs
-import ensemble_functions
-import plot_functions
+import ensemble_defs
+import plot_defs
 
 #********************************************************************************************************
 run = 'geoheats'
@@ -49,16 +49,16 @@ cdp['T'] = cdp['U']
 # Control climatology
 members_control = clim_defs.clim_lat_hgt('control',season,varcode)
 nmembers_control = len(members_control)
-ensmean_control, ensstd_control = ensemble_functions.stats(members_control)
+ensmean_control, ensstd_control = ensemble_defs.stats(members_control)
 
 # Perturbation climatology 
 members = clim_defs.clim_lat_hgt(run,season,varcode)
 nmembers = len(members)
-ensmean, ensstd = ensemble_functions.stats(members) 
+ensmean, ensstd = ensemble_defs.stats(members) 
 
 # Difference to Base
 ensdiff = ensmean - ensmean_control
-ttest = ensemble_functions.t_test_twosample(alpha, ensdiff, ensstd_control, ensstd, nmembers_control, nmembers)
+ttest = ensemble_defs.t_test_twosample(alpha, ensdiff, ensstd_control, ensstd, nmembers_control, nmembers)
 
 # Convert to trend
 ensdiff = ensdiff/65.*30.
@@ -69,7 +69,7 @@ T50pole = (ensdiff.sel(lat=slice(60,90),level=50)*areawgt.sel(lat=slice(60,90)))
 print(T50trop - T50pole)
 
 # Plot ensemble mean
-plot_functions.plot_single_lat_hgt(ensdiff, ensmean_control,\
+plot_defs.plot_single_lat_hgt(ensdiff, ensmean_control,\
                                    plotlett[varcode][run][season]+' '+runname[run],\
                                    outdir+varcode+'_clim_'+run+'_'+season+'.png',\
                                    shading[varcode][run][0], shading[varcode][run][1],\
@@ -81,7 +81,7 @@ plot_functions.plot_single_lat_hgt(ensdiff, ensmean_control,\
 
 '''
 # Plot members 
-plot_functions.plot_matrix_lat_hgt(members, ensmean_control,\
+plot_defs.plot_matrix_lat_hgt(members, ensmean_control,\
                                    '',\
                                    outdir+varcode+'_trend_'+run+'_members_'+season+'.png',\
                                    shading[run][varcode][0], shading[run][varcode][1], contours[run][varcode][0], contours[run][varcode][1],\
@@ -91,7 +91,7 @@ plot_functions.plot_matrix_lat_hgt(members, ensmean_control,\
 '''
 # testing for T
 # Plot ensemble mean
-plot_functions.plot_single_lat_hgt_onesided(ensmean_control, ensmean_control,\
+plot_defs.plot_single_lat_hgt_onesided(ensmean_control, ensmean_control,\
                                    'T',\
                                    #outdir+varcode+'_clim_'+run+'_'+season+'.png',\
                                    outdir+varcode+'_clim_control_'+season+'.png',\

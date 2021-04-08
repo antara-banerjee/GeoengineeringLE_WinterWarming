@@ -9,8 +9,8 @@ import numpy as np
 import scipy.stats as ss
 
 # user imports
-import ensemble_functions
-import plot_functions
+import ensemble_defs
+import plot_defs
 import vartimeproc 
 
 #********************************************************************************************************
@@ -84,8 +84,8 @@ for i in range(1,21):
 
 print("...done calculation for each member")
 
-#ensmean_congr, ensstd_congr = ensemble_functions.stats(members_congr) 
-#ensmean_resid, ensstd_resid = ensemble_functions.stats(members_resid) 
+#ensmean_congr, ensstd_congr = ensemble_defs.stats(members_congr) 
+#ensmean_resid, ensstd_resid = ensemble_defs.stats(members_resid) 
 
 ensmean_congr = np.array(members_congr).mean(axis=0)
 ensmean_resid = np.array(members_resid).mean(axis=0)
@@ -95,13 +95,13 @@ print('ensemble mean resid shape: ',ensmean_resid.shape)
 ensstd_congr = np.array(members_congr).std(axis=0)
 ensstd_resid = np.array(members_resid).std(axis=0)
 
-ttest_congr = ensemble_functions.t_test_onesample(alpha, ensmean_congr, ensstd_congr, len(members_congr))
-ttest_resid = ensemble_functions.t_test_onesample(alpha, ensmean_resid, ensstd_resid, len(members_resid))
+ttest_congr = ensemble_defs.t_test_onesample(alpha, ensmean_congr, ensstd_congr, len(members_congr))
+ttest_resid = ensemble_defs.t_test_onesample(alpha, ensmean_resid, ensstd_resid, len(members_resid))
 
 #********************************************************************************************************
 # Plot
 # congruent
-plot_functions.plot_single_lat_lon(ensmean_congr, tseries_surf['lat'], tseries_surf['lon'],\
+plot_defs.plot_single_lat_lon(ensmean_congr, tseries_surf['lat'], tseries_surf['lon'],\
 				   plotlett['congr'][varcode]+' GEO8.5: NAM$_{50}$-congruent\n'+longtitle[varcode],\
 				   outdir+varcode+'_congr_feedback_'+season+'.png',\
 				   shading[varcode][0], shading[varcode][1],\
@@ -111,7 +111,7 @@ plot_functions.plot_single_lat_lon(ensmean_congr, tseries_surf['lat'], tseries_s
 				   colorscale=colorscale[varcode])
 
 # residual
-plot_functions.plot_single_lat_lon(ensmean_resid, tseries_surf['lat'], tseries_surf['lon'],\
+plot_defs.plot_single_lat_lon(ensmean_resid, tseries_surf['lat'], tseries_surf['lon'],\
 				   plotlett['resid'][varcode]+' GEO8.5: Residual\n'+longtitle[varcode],\
 				   outdir+varcode+'_resid_feedback_'+season+'.png',\
 				   shading[varcode][0], shading[varcode][1],\

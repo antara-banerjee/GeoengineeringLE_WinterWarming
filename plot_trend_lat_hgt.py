@@ -10,8 +10,8 @@ import xarray as xr
 
 # user functions
 import clim_defs
-import ensemble_functions
-import plot_functions
+import ensemble_defs
+import plot_defs
 import trend_defs
 
 #********************************************************************************************************
@@ -48,23 +48,23 @@ clabel    = {'U'       :'Zonal mean zonal wind (ms$^{-1}$ per 30 yrs)',\
 # Control climatology
 members_control = clim_defs.clim_lat_hgt('control',season,varcode)
 nmembers_control = len(members_control)
-ensmean_control, ensstd_control = ensemble_functions.stats(members_control)
+ensmean_control, ensstd_control = ensemble_defs.stats(members_control)
 
 # Perturbation climatology 
 members = trend_defs.trend_lat_hgt(run,season,varcode)
 nmembers = len(members)
-ensmean, ensstd = ensemble_functions.stats(members) 
-ttest = ensemble_functions.t_test_onesample(alpha, ensmean, ensstd, nmembers) 
+ensmean, ensstd = ensemble_defs.stats(members) 
+ttest = ensemble_defs.t_test_onesample(alpha, ensmean, ensstd, nmembers) 
 
 areawgt = np.cos(np.deg2rad(ensmean.lat))
 #ensmean_weighted = ensmean.weighted(areawgt)
 T50trop = (ensmean.sel(lat=slice(-30,30),level=50)*areawgt.sel(lat=slice(-30,30))).sum() / areawgt.sel(lat=slice(-30,30)).sum()
 T50pole = (ensmean.sel(lat=slice(60,90),level=50)*areawgt.sel(lat=slice(60,90))).sum() / areawgt.sel(lat=slice(60,90)).sum()
-print(round(T50trop - T50pole),2))
+print(T50trop.values - T50pole.values)
 
 '''
 # Plot ensemble mean
-plot_functions.plot_single_lat_hgt(ensmean, ensmean_control,\
+plot_defs.plot_single_lat_hgt(ensmean, ensmean_control,\
                                    plotlett[varcode][run][season]+' '+runname[run],\
                                    outdir+varcode+'_trend_'+run+'_'+season+'.png',\
                                    shading[varcode][run][0], shading[varcode][run][1],\
@@ -76,7 +76,7 @@ plot_functions.plot_single_lat_hgt(ensmean, ensmean_control,\
 '''
 
 # Plot members 
-plot_functions.plot_matrix_lat_hgt(members, ensmean_control, ensmean_control['lat'], ensmean_control['level'],\
+plot_defs.plot_matrix_lat_hgt(members, ensmean_control, ensmean_control['lat'], ensmean_control['level'],\
                                    '',\
                                    outdir+varcode+'_trend_'+run+'_members_'+season+'.png',\
                                    shading[varcode][run][0], shading[varcode][run][1],\
@@ -85,7 +85,7 @@ plot_functions.plot_matrix_lat_hgt(members, ensmean_control, ensmean_control['la
                                    clabel[varcode])
 
 '''
-plot_functions.plot_single_lat_hgt(ensmean, ensmean,\
+plot_defs.plot_single_lat_hgt(ensmean, ensmean,\
 				   runname[run],\
                                    outdir+varcode+'_trend_'+run+'_'+season+'.png',\
                                    10, 1, 10, 1, 10, 1, 1, 'T / degreesC',\
