@@ -107,19 +107,19 @@ def area_subset(var, mode, lats, lons, coslat):
       ulat = lats[-1]
       llon = lons[0]
       ulon = lons[-1]
-      illat = np.where(lats>=llat)[0][0]
-      iulat = np.where(lats>=ulat)[0][0]+1
-      illon = np.where(lons>=llon)[0][0]
-      iulon = np.where(lons>=ulon)[0][0]+1
+      illat = (np.abs(lats-llat)).argmin()
+      iulat = (np.abs(lats-ulat)).argmin()+1
+      illon = (np.abs(lons-llon)).argmin()
+      iulon = (np.abs(lons-ulon)).argmin()+1
    elif mode=='NAO':
       llat = 20
       ulat = 80
       llon = -90
       ulon = 40
-      illat = np.where(lats>=llat)[0][0]
-      iulat = np.where(lats>=ulat)[0][0]
-      illon = np.where(lons>=llon)[0][0]
-      iulon = np.where(lons>=ulon)[0][0]+1
+      illat = (np.abs(lats-llat)).argmin()
+      iulat = (np.abs(lats-ulat)).argmin()+1
+      illon = (np.abs(lons-llon)).argmin()
+      iulon = (np.abs(lons-ulon)).argmin()+1
    
    # change to match xarray!!!!
    varsub = var[:,illat:iulat,illon:iulon]
@@ -144,7 +144,6 @@ def calc_EOF2D(anom, nplat, coslat, varcode):
       if eof1[np.where(nplat>=68)[0][0],0] > 0: # PSL 
          eof1 = -eof1
    elif varcode=='Z3':
-      #if eof1[np.where(nplat>=80)[0][0],0] > 0: # Z3
       if eof1[np.where(nplat>=75)[0][0],0] > 0: # Z3
          eof1 = -eof1
    elif varcode=='U':
