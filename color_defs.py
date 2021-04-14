@@ -10,10 +10,10 @@ def rgb_to_hex(rgb):
     return '#%02x%02x%02x' % rgb
 
 #*********************************************************************************
-def custom_colors(word):	 
+def custom(name):	 
 
-   if word == 'BlueRed':
-      var = colors.LinearSegmentedColormap.from_list(word,[\
+   if name == 'BlueRed':
+      var = colors.LinearSegmentedColormap.from_list(name,[\
       rgb_to_hex(( 25, 25, 112)),\
       rgb_to_hex(( 10, 50, 120)),\
       rgb_to_hex((15, 75, 165)),\
@@ -31,8 +31,8 @@ def custom_colors(word):
       rgb_to_hex((165, 0, 0)),\
       rgb_to_hex((128, 0, 0))])
       return var
-   elif word == 'BrownGreen':
-      var = colors.LinearSegmentedColormap.from_list(word,[\
+   elif name == 'BrownGreen':
+      var = colors.LinearSegmentedColormap.from_list(name,[\
       rgb_to_hex((127, 39, 4)),\
       rgb_to_hex((166, 54, 3)),\
       rgb_to_hex((217, 72, 1)),\

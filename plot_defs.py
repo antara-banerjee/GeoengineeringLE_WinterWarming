@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # user imports
-import custom_colors as ccol
+import color_defs 
 
 #********************************************************************************************************
 # LATITUDE-HEIGHT CROSS SECTIONS
@@ -32,7 +32,7 @@ def plot_single_lat_hgt(z, zbase, title, outname, lim, by, cbarlim, cbarby, clim
    xlab = 'Latitude'
    ylab = 'Pressure (hPa)'
    #ylab = ''
-   cols = ccol.custom_colors('BlueRed')
+   cols = color_defs.custom('BlueRed')
 
    # main plot
    fig.add_axes([0.12, 0.15, 0.65, 0.75]) # left, bottom, width, height
@@ -78,7 +78,7 @@ def plot_single_lat_hgt_onesided(z, zbase, title, outname, lim, by, cbarlim, cba
    top = 1
    xlab = 'Latitude'
    ylab = 'Pressure (hPa)'
-   #cols = ccol.custom_colors('BlueRed')
+   #cols = color_defs.custom('BlueRed')
 
    # main plot
    fig.add_axes([0.12, 0.15, 0.65, 0.75]) # left, bottom, width, height
@@ -120,7 +120,7 @@ def plot_matrix_lat_hgt(members, zbase, lat, hgt, title, outname, lim, by, cbarl
    cbarticks = np.arange(-cbarlim,cbarlim+cbarby,cbarby)
    bottom = 1000
    top = 1
-   cols = ccol.custom_colors('BlueRed')
+   cols = color_defs.custom('BlueRed')
 
    def plot_single_member(z, inens, count):
       col = int((count%5))+1
@@ -181,7 +181,7 @@ def plot_single_lat_lon(z, zlat, zlon, title, outname, lim, by, cbarlim, cbarby,
    # some plot parameters
    levs = np.arange(-lim,lim+by,by)
    cbarticks = np.arange(-cbarlim,cbarlim+cbarby,cbarby)
-   cols = ccol.custom_colors(colorscale)
+   cols = color_defs.custom(colorscale)
    
    # set up map
    prj = ccrs.NorthPolarStereo()
@@ -227,7 +227,7 @@ def plot_matrix_lat_lon(members, zlat, zlon, title, outname, lim, by, cbarlim, c
    # some plot parameters
    levs = np.arange(-lim,lim+by,by)
    cbarticks = np.arange(-cbarlim,cbarlim+cbarby,cbarby)
-   cols     = ccol.custom_colors(colorscale)
+   cols     = color_defs.custom(colorscale)
 
    def plot_single_member(z, inens, count):
       col = int(count%5)+1
