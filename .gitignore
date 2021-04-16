@@ -1,3 +1,4 @@
 npy_output/
 output/
 *.pyc
+SNR_TREFHT_trend.nc
