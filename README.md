@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/252034824.svg)](https://zenodo.org/badge/latestdoi/252034824)
+
 # Geoengineering Large ENSemble (GLENS) winter warming analysis
 
 ## Introduction
